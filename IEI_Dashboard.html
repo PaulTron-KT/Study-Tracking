@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IEI · Student Journey Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Serif:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#141B2B;
+  --ink-2:#1E2A42;
+  --ink-3:#2B3A57;
+  --paper:#EFF2F6;
+  --card:#FFFFFF;
+  --border:#DFE3EA;
+  --border-soft:#EAEDF2;
+  --text:#1A2233;
+  --muted:#636E80;
+  --muted-2:#8A93A3;
+
+  --gold:#A9781F;
+  --gold-ink:#7A5814;
+  --gold-soft:#F3E8D3;
+
+  --blue:#2E5C8C;
+  --blue-soft:#E4ECF6;
+
+  --green:#2E7D5B;
+  --green-soft:#DFF0E7;
+
+  --amber:#B4740F;
+  --amber-soft:#FAE7C7;
+
+  --red:#B03A2E;
+  --red-soft:#F8E1DE;
+
+  --grey:#9AA2AF;
+  --grey-soft:#EDEFF2;
+
+  --radius:8px;
+  --radius-lg:12px;
+  --font-serif:'IBM Plex Serif', Georgia, 'Times New Roman', serif;
+  --font-sans:'IBM Plex Sans', 'Segoe UI', Arial, sans-serif;
+  --shadow: 0 1px 2px rgba(20,27,43,0.06), 0 8px 24px -12px rgba(20,27,43,0.18);
+}
+
+*{box-sizing:border-box;}
+html,body{height:100%;}
+body{
+  margin:0;
+  font-family:var(--font-sans);
+  color:var(--text);
+  background:var(--paper);
+  -webkit-font-smoothing:antialiased;
+  font-variant-numeric:tabular-nums;
+}
+::selection{background:var(--gold-soft);}
+a{color:inherit;}
+button{font-family:inherit;}
+
+/* ---------- layout ---------- */
+.app{
+  display:grid;
+  grid-template-columns:248px 1fr;
+  min-height:100vh;
+}
+.sidebar{
+  background:linear-gradient(180deg, var(--ink) 0%, var(--ink-2) 100%);
+  color:#D9DEE8;
+  padding:26px 20px 20px;
+  display:flex;
+  flex-direction:column;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+.brand{
+  display:flex;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:30px;
+  padding-bottom:20px;
+  border-bottom:1px solid rgba(255,255,255,0.09);
+}
+.brand-mark{
+  width:38px;height:38px;flex:0 0 38px;
+  border-radius:8px;
+  background:linear-gradient(145deg, var(--gold) 0%, #8C6417 100%);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-serif);
+  font-weight:700;
+  font-size:16px;
+  color:#1A1204;
+}
+.brand-text .name{
+  font-family:var(--font-serif);
+  font-size:16.5px;
+  font-weight:600;
+  color:#F4F1E8;
+  line-height:1.25;
+}
+.brand-text .sub{
+  font-size:11.5px;
+  color:#95A0B5;
+  margin-top:2px;
+}
+.nav{
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+  margin-bottom:auto;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:11px;
+  padding:10px 12px;
+  border-radius:7px;
+  cursor:pointer;
+  font-size:13.6px;
+  color:#B7C0D1;
+  border:none;
+  background:transparent;
+  text-align:left;
+  width:100%;
+  transition:background .12s ease, color .12s ease;
+}
+.nav-item svg{flex:0 0 17px;opacity:.85;}
+.nav-item:hover{background:rgba(255,255,255,0.06);color:#F1F3F7;}
+.nav-item.active{background:rgba(169,120,31,0.18);color:#F4E9D2;font-weight:500;}
+.nav-item.active svg{opacity:1;}
+.sidebar-foot{
+  padding-top:16px;
+  margin-top:16px;
+  border-top:1px solid rgba(255,255,255,0.09);
+  font-size:11.2px;
+  color:#7C879C;
+  line-height:1.6;
+}
+.sidebar-foot b{color:#B7C0D1;font-weight:500;}
+
+/* ---------- main ---------- */
+.main{
+  padding:22px 30px 60px;
+  max-width:1360px;
+}
+.topbar{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:24px;
+  margin-bottom:22px;
+  flex-wrap:wrap;
+}
+.topbar h1{
+  font-family:var(--font-serif);
+  font-size:24px;
+  font-weight:600;
+  margin:0 0 4px;
+  letter-spacing:-.2px;
+}
+.topbar .desc{
+  font-size:13px;
+  color:var(--muted);
+  max-width:560px;
+}
+.searchbox{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:8px;
+  padding:9px 12px;
+  min-width:260px;
+  box-shadow:var(--shadow);
+}
+.searchbox svg{flex:0 0 15px;color:var(--muted-2);}
+.searchbox input{
+  border:none;outline:none;background:none;
+  font-size:13.4px;color:var(--text);width:100%;
+  font-family:inherit;
+}
+.searchbox input::placeholder{color:var(--muted-2);}
+
+.view{display:none;}
+.view.active{display:block;}
+
+/* ---------- kpi ---------- */
+.kpi-row{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  gap:14px;
+  margin-bottom:20px;
+}
+.kpi{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:16px 17px;
+  border-left:3px solid var(--kpi-color, var(--blue));
+}
+.kpi .label{font-size:12px;color:var(--muted);margin-bottom:8px;}
+.kpi .value{font-family:var(--font-serif);font-size:26px;font-weight:600;line-height:1;color:var(--text);}
+.kpi .value small{font-family:var(--font-sans);font-size:14px;font-weight:500;color:var(--muted);margin-left:2px;}
+.kpi .note{font-size:11.5px;color:var(--muted-2);margin-top:7px;}
+
+/* ---------- panels/cards ---------- */
+.grid-2{display:grid;grid-template-columns:1.1fr 1fr;gap:14px;margin-bottom:14px;}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:14px;}
+.panel{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:18px 20px 20px;
+}
+.panel-head{
+  display:flex;align-items:baseline;justify-content:space-between;margin-bottom:14px;gap:10px;
+}
+.panel-head h3{
+  font-family:var(--font-serif);font-size:15.5px;font-weight:600;margin:0;
+}
+.panel-head .hint{font-size:11.5px;color:var(--muted-2);}
+
+.legend{display:flex;flex-direction:column;gap:9px;margin-top:14px;}
+.legend-item{display:flex;align-items:center;gap:9px;font-size:12.8px;color:var(--text);}
+.legend-dot{width:9px;height:9px;border-radius:50%;flex:0 0 9px;}
+.legend-item .count{margin-left:auto;font-weight:600;color:var(--muted);}
+
+/* ---------- badges ---------- */
+.badge{
+  display:inline-flex;align-items:center;gap:6px;
+  font-size:12px;font-weight:500;padding:3px 9px 3px 7px;border-radius:20px;
+  white-space:nowrap;
+}
+.badge .dot{width:6px;height:6px;border-radius:50%;}
+.badge.low{background:var(--green-soft);color:#1F5A40;}
+.badge.low .dot{background:var(--green);}
+.badge.medium{background:var(--amber-soft);color:#7A4E0A;}
+.badge.medium .dot{background:var(--amber);}
+.badge.high{background:var(--red-soft);color:#7C271D;}
+.badge.high .dot{background:var(--red);}
+.badge.neutral{background:var(--grey-soft);color:#525A66;}
+.badge.neutral .dot{background:var(--grey);}
+.badge.gold{background:var(--gold-soft);color:var(--gold-ink);}
+.badge.gold .dot{background:var(--gold);}
+
+/* ---------- table ---------- */
+.table-wrap{overflow-x:auto;}
+table{width:100%;border-collapse:collapse;font-size:13px;}
+thead th{
+  text-align:left;font-size:11.5px;color:var(--muted);font-weight:500;
+  padding:0 12px 9px;border-bottom:1px solid var(--border);
+  white-space:nowrap;cursor:pointer;user-select:none;
+}
+thead th:hover{color:var(--text);}
+thead th.sorted::after{content:' \25BE';color:var(--gold);}
+tbody td{padding:11px 12px;border-bottom:1px solid var(--border-soft);vertical-align:middle;}
+tbody tr{cursor:pointer;transition:background .1s ease;}
+tbody tr:hover{background:#F7F8FA;}
+.name-cell{display:flex;align-items:center;gap:10px;}
+.avatar{
+  width:30px;height:30px;border-radius:50%;flex:0 0 30px;
+  background:var(--ink-3);color:#EFE6D0;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-serif);font-size:12.5px;font-weight:600;
+}
+.name-cell .id{font-size:11.5px;color:var(--muted-2);}
+.mini-bar-track{width:64px;height:6px;background:var(--grey-soft);border-radius:4px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px;}
+.mini-bar-fill{height:100%;border-radius:4px;display:block;}
+.filters{display:flex;gap:9px;margin-bottom:14px;flex-wrap:wrap;align-items:center;}
+.select{
+  border:1px solid var(--border);background:var(--card);border-radius:7px;
+  padding:8px 10px;font-size:12.6px;color:var(--text);font-family:inherit;
+}
+.count-pill{font-size:11.8px;color:var(--muted);margin-left:auto;}
+
+/* ---------- timeline (program) ---------- */
+.gantt{position:relative;padding-top:8px;}
+.gantt-row{display:grid;grid-template-columns:150px 1fr;align-items:center;gap:14px;padding:11px 0;border-bottom:1px solid var(--border-soft);}
+.gantt-row:last-child{border-bottom:none;}
+.gantt-label .name{font-size:13.2px;font-weight:600;}
+.gantt-label .sub{font-size:11px;color:var(--muted-2);margin-top:2px;}
+.gantt-track{position:relative;height:26px;background:var(--grey-soft);border-radius:6px;}
+.gantt-bar{position:absolute;top:0;height:100%;border-radius:6px;display:flex;align-items:center;padding:0 9px;font-size:11px;color:#fff;white-space:nowrap;overflow:hidden;}
+.gantt-today{position:absolute;top:-6px;bottom:-6px;width:2px;background:var(--red);z-index:2;}
+.gantt-today-label{position:absolute;top:-22px;font-size:10.5px;color:var(--red);font-weight:600;transform:translateX(-50%);white-space:nowrap;}
+.gantt-axis{display:grid;grid-template-columns:150px 1fr;gap:14px;margin-top:4px;}
+.gantt-axis-track{position:relative;height:18px;}
+.gantt-axis-tick{position:absolute;top:0;font-size:10.3px;color:var(--muted-2);transform:translateX(-50%);}
+
+.milestone-list{margin-top:16px;display:flex;flex-direction:column;gap:8px;}
+.milestone-item{display:flex;gap:10px;font-size:12.4px;padding:9px 11px;background:var(--paper);border-radius:7px;}
+.milestone-item .m-course{font-weight:600;color:var(--ink-2);flex:0 0 76px;}
+.milestone-item .m-text{color:var(--muted);}
+
+/* ---------- team/roles ---------- */
+.role-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;}
+.role-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px;background:var(--card);}
+.role-card .r-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;margin-bottom:11px;}
+.role-card h4{font-family:var(--font-serif);font-size:14.5px;margin:0 0 6px;}
+.role-card p{font-size:12.4px;color:var(--muted);margin:0;line-height:1.55;}
+
+/* ---------- drawer ---------- */
+.overlay{
+  position:fixed;inset:0;background:rgba(15,20,32,0.42);
+  opacity:0;pointer-events:none;transition:opacity .18s ease;z-index:40;
+}
+.overlay.show{opacity:1;pointer-events:auto;}
+.drawer{
+  position:fixed;top:0;right:0;bottom:0;width:min(680px,94vw);
+  background:var(--paper);z-index:41;
+  box-shadow:-16px 0 40px rgba(15,20,32,0.22);
+  transform:translateX(100%);transition:transform .22s ease;
+  overflow-y:auto;
+}
+.drawer.show{transform:translateX(0);}
+.drawer-head{
+  background:linear-gradient(135deg, var(--ink) 0%, var(--ink-3) 100%);
+  color:#fff;padding:24px 26px 22px;position:relative;
+}
+.drawer-close{
+  position:absolute;top:18px;right:18px;width:30px;height:30px;border-radius:50%;
+  background:rgba(255,255,255,0.12);border:none;color:#fff;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+}
+.drawer-close:hover{background:rgba(255,255,255,0.22);}
+.drawer-head .d-name{font-family:var(--font-serif);font-size:21px;font-weight:600;}
+.drawer-head .d-id{font-size:12px;color:#B7C0D1;margin-top:2px;}
+.drawer-head .d-meta{display:flex;gap:16px;flex-wrap:wrap;margin-top:14px;font-size:12px;color:#C7CEDB;}
+.drawer-head .d-meta b{color:#F1E9D4;font-weight:500;}
+.drawer-body{padding:20px 26px 40px;display:flex;flex-direction:column;gap:16px;}
+
+.progress-track{position:relative;height:6px;background:rgba(255,255,255,0.15);border-radius:4px;margin-top:14px;}
+.progress-fill{position:absolute;top:0;left:0;height:100%;background:var(--gold);border-radius:4px;}
+.stage-labels{display:flex;justify-content:space-between;margin-top:7px;font-size:10.4px;color:#8D97AA;}
+.stage-labels span.current{color:#F4E9D2;font-weight:600;}
+
+.course-card{border:1px solid var(--border);border-radius:var(--radius-lg);background:var(--card);overflow:hidden;}
+.course-card-head{
+  display:flex;align-items:center;justify-content:space-between;padding:13px 16px;
+  background:#F7F8FA;border-bottom:1px solid var(--border);
+}
+.course-card-head .c-name{font-weight:600;font-size:13.6px;}
+.course-card-head .c-dates{font-size:11.3px;color:var(--muted-2);}
+.course-card-body{padding:14px 16px 16px;}
+.stat-row{display:flex;gap:22px;flex-wrap:wrap;margin-bottom:12px;}
+.stat{font-size:12px;}
+.stat .n{font-family:var(--font-serif);font-size:17px;font-weight:600;display:block;}
+.stat .l{color:var(--muted-2);}
+.attendance-strip{display:flex;flex-wrap:wrap;gap:3px;margin:10px 0 4px;}
+.att-cell{width:13px;height:13px;border-radius:3px;}
+.score-table{width:100%;font-size:12px;border-collapse:collapse;margin-top:10px;}
+.score-table th{text-align:left;color:var(--muted-2);font-weight:500;padding:4px 8px 4px 0;border-bottom:1px solid var(--border-soft);}
+.score-table td{padding:5px 8px 5px 0;border-bottom:1px solid var(--border-soft);font-weight:500;}
+.no-data{font-size:12px;color:var(--muted-2);font-style:italic;padding:6px 0;}
+
+.support-item{border-left:3px solid var(--border); padding:9px 0 9px 12px;margin-bottom:4px;}
+.support-item.open{border-left-color:var(--amber);}
+.support-item.closed{border-left-color:var(--green);}
+.support-item .s-top{display:flex;justify-content:space-between;font-size:12.6px;font-weight:600;}
+.support-item .s-meta{font-size:11.5px;color:var(--muted);margin-top:2px;}
+.support-item .s-note{font-size:12px;color:var(--text);margin-top:4px;}
+
+.people-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.person-card{border:1px solid var(--border);border-radius:8px;padding:11px 13px;background:var(--card);display:flex;gap:10px;align-items:flex-start;}
+.person-card .p-icon{width:30px;height:30px;border-radius:7px;background:var(--blue-soft);color:var(--blue);display:flex;align-items:center;justify-content:center;flex:0 0 30px;font-size:14px;}
+.person-card .p-name{font-size:12.8px;font-weight:600;}
+.person-card .p-role{font-size:11.3px;color:var(--muted);margin-top:1px;}
+
+.cert-card{border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;background:var(--card);}
+.cert-scores{display:flex;gap:18px;margin-top:10px;flex-wrap:wrap;}
+.cert-scores .cs{font-size:12px;text-align:center;}
+.cert-scores .cs .n{font-family:var(--font-serif);font-size:18px;font-weight:600;display:block;}
+
+@media (max-width:1080px){
+  .kpi-row{grid-template-columns:repeat(2,1fr);}
+  .grid-2,.grid-3{grid-template-columns:1fr;}
+  .role-grid{grid-template-columns:repeat(2,1fr);}
+  .people-grid{grid-template-columns:1fr;}
+}
+@media (max-width:760px){
+  .app{grid-template-columns:1fr;}
+  .sidebar{position:relative;height:auto;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">B2</div>
+      <div class="brand-text">
+        <div class="name">IEI Student Journey</div>
+        <div class="sub">Lộ trình phát triển đến B2</div>
+      </div>
+    </div>
+    <nav class="nav">
+      <button class="nav-item active" data-view="overview">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="12" width="4" height="8"/><rect x="10" y="7" width="4" height="13"/><rect x="17" y="3" width="4" height="17"/></svg>
+        Tổng quan
+      </button>
+      <button class="nav-item" data-view="students">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.5 2.7-6 6-6s6 2.5 6 6"/><circle cx="18" cy="9" r="2.6"/><path d="M15.5 14.3c2.6.2 5 2.3 5.5 5.7"/></svg>
+        Sinh viên
+      </button>
+      <button class="nav-item" data-view="timeline">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg>
+        Lộ trình chương trình
+      </button>
+      <button class="nav-item" data-view="team">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 19V5a1 1 0 0 1 1-1h10l5 5v10a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1Z"/><path d="M14 4v5h5"/></svg>
+        Đội ngũ &amp; quy trình
+      </button>
+    </nav>
+    <div class="sidebar-foot" id="sidebarFoot"></div>
+  </aside>
+
+  <main class="main">
+
+    <!-- OVERVIEW -->
+    <section id="view-overview" class="view active">
+      <div class="topbar">
+        <div>
+          <h1>Tổng quan cohort</h1>
+          <div class="desc">Bức tranh toàn cảnh về điểm danh, kết quả học tập và mức độ rủi ro của toàn bộ sinh viên trong lộ trình English Cornerstone → AV1–AV4 → Chứng chỉ B2.</div>
+        </div>
+      </div>
+
+      <div class="kpi-row" id="kpiRow"></div>
+
+      <div class="grid-3">
+        <div class="panel" style="grid-column:span 1;">
+          <div class="panel-head"><h3>Phân bổ mức độ rủi ro</h3></div>
+          <div id="riskDonut"></div>
+        </div>
+        <div class="panel" style="grid-column:span 2;">
+          <div class="panel-head">
+            <h3>Điểm danh &amp; điểm tổng kết trung bình theo học phần</h3>
+            <span class="hint">AV1 – AV4</span>
+          </div>
+          <div id="courseBar"></div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="panel">
+          <div class="panel-head"><h3>Sinh viên cần theo dõi</h3><span class="hint">Rủi ro trung bình / cao</span></div>
+          <div id="watchList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Ghi nhận hỗ trợ &amp; can thiệp gần đây</h3></div>
+          <div id="recentSupport"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-head"><h3>Sinh viên đã đạt chứng chỉ B2</h3><span class="hint" id="certAchievedHint"></span></div>
+          <div id="certAchievedList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- STUDENTS -->
+    <section id="view-students" class="view">
+      <div class="topbar">
+        <div>
+          <h1>Danh sách sinh viên</h1>
+          <div class="desc">Nhấp vào một sinh viên để xem chi tiết lộ trình, điểm số, điểm danh và những người phụ trách liên quan.</div>
+        </div>
+        <div class="searchbox">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+          <input id="searchInput" placeholder="Tìm theo tên hoặc mã sinh viên…">
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="filters">
+          <select class="select" id="filterRisk">
+            <option value="">Tất cả mức rủi ro</option>
+            <option value="Low">Thấp</option>
+            <option value="Medium">Trung bình</option>
+            <option value="High">Cao</option>
+          </select>
+          <select class="select" id="filterMajor">
+            <option value="">Tất cả ngành</option>
+          </select>
+          <select class="select" id="filterStage">
+            <option value="">Tất cả chặng hiện tại</option>
+          </select>
+          <span class="count-pill" id="rowCount"></span>
+        </div>
+        <div class="table-wrap">
+          <table id="studentTable">
+            <thead>
+              <tr>
+                <th data-key="name">Sinh viên</th>
+                <th data-key="major">Ngành</th>
+                <th data-key="placement_cefr">Đầu vào</th>
+                <th data-key="current_stage">Chặng hiện tại</th>
+                <th data-key="overall_attendance_rate">Điểm danh</th>
+                <th data-key="overall_final_avg">Điểm TB</th>
+                <th data-key="risk_level">Rủi ro</th>
+                <th data-key="support_count">Hỗ trợ</th>
+              </tr>
+            </thead>
+            <tbody id="studentTbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TIMELINE -->
+    <section id="view-timeline" class="view">
+      <div class="topbar">
+        <div>
+          <h1>Lộ trình chương trình</h1>
+          <div class="desc">Toàn bộ chặng đào tạo của cohort, từ English Cornerstone đến kỳ thi chứng chỉ quốc tế tương đương B2.</div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><h3>Dòng thời gian chương trình</h3><span class="hint" id="todayHint"></span></div>
+        <div id="ganttChart"></div>
+      </div>
+      <div class="panel" style="margin-top:14px;">
+        <div class="panel-head"><h3>Mốc đánh giá chính theo học phần</h3></div>
+        <div class="milestone-list" id="milestoneList"></div>
+      </div>
+    </section>
+
+    <!-- TEAM -->
+    <section id="view-team" class="view">
+      <div class="topbar">
+        <div>
+          <h1>Đội ngũ &amp; quy trình cập nhật</h1>
+          <div class="desc">Ai chịu trách nhiệm cập nhật phần nào của dữ liệu hành trình sinh viên, theo mô hình một workbook chung cho toàn cohort.</div>
+        </div>
+      </div>
+      <div class="role-grid" id="roleGrid"></div>
+      <div class="panel" style="margin-top:14px;">
+        <div class="panel-head"><h3>Vì sao tách theo học phần?</h3></div>
+        <p style="font-size:13px;color:var(--muted);line-height:1.7;margin:0;">AV1–AV4 đều có 30 buổi học nhưng lịch checkpoint và final khác nhau giữa các học phần. Việc tách tab theo từng học phần giúp giáo viên chỉ nhìn đúng lịch giảng dạy của mình, thay vì thao tác trên một bảng gộp hơn 150 buổi học của toàn lộ trình.</p>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div class="overlay" id="overlay"></div>
+<aside class="drawer" id="drawer"></aside>
+
+<script>
+const DATA = {"generated_at": "21/09/2026 02:12", "cohort_name": "IEI_2627", "schedule": [{"course": "Cornerstone", "course_name": "English Cornerstone", "start": "07/09/2026", "end": "11/10/2026", "delivery": "Online – 5 weeks", "planned_lessons": "10 lessons / 5 weeks", "milestone": "LMS weekly quiz + self-reflection + Final Exam"}, {"course": "AV1", "course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "delivery": "Mon/Tue/Thu/Fri", "planned_lessons": "30 lessons", "milestone": "CP1 L9 (05/10); CP2 L17 (19/10); Final LRW 09/11; Speaking 10/11"}, {"course": "AV2", "course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "delivery": "Mon/Tue/Thu/Fri", "planned_lessons": "30 lessons", "milestone": "CP1 L15 (17/12); CP2 L22 (29/12); Final S 12/01; LRW 11/01; Exit Review 14/01"}, {"course": "AV3", "course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "delivery": "TBD", "planned_lessons": "30 lessons", "milestone": "Assessment dates TBD"}, {"course": "AV4", "course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "delivery": "TBD", "planned_lessons": "30 lessons", "milestone": "Assessment dates TBD"}, {"course": "CERT", "course_name": "Certification Prep & Test", "start": "23/05/2027", "end": "07/06/2027", "delivery": "Support / self-study", "planned_lessons": "—", "milestone": "International certificate equivalent to B2"}], "students": [{"id": "DEMO001", "name": "Nguyễn Minh Anh", "email": "demo001@student.demo.vn", "cohort": "IEI_2627", "major": "Kinh doanh quốc tế", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 4, "late": 0, "excused": 0, "rate": 86.7, "codes": ["P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "A", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 70.0, "CP2": 64.0}, "final_scores": {"Final_L": 68.9, "Final_R": 68.2, "Final_W": 79.1, "Final_S": 77.3}, "final_avg": 73.4, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 4, "late": 0, "excused": 0, "rate": 86.7, "codes": ["P", "A", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 70.8, "Final_R": 76.5, "Final_W": 79.6, "Final_S": 82.1}, "final_avg": 77.2, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 4, "late": 1, "excused": 0, "rate": 86.7, "codes": ["P", "P", "P", "A", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "A", "P", "L", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 70.8, "Final_R": 76.5, "Final_W": 79.6, "Final_S": 82.1}, "final_avg": 77.2, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 1, "late": 1, "excused": 0, "rate": 96.7, "codes": ["P", "P", "L", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 70.8, "Final_R": 76.5, "Final_W": 79.6, "Final_S": 82.1}, "final_avg": 77.2, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Unit 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 89.2, "overall_final_avg": 76.2, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Medium", "risk_reasons": ["Điểm danh cần cải thiện (89.2%)"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO002", "name": "Trần Gia Hân", "email": "demo002@student.demo.vn", "cohort": "IEI_2627", "major": "Kỹ thuật phần mềm", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 1, "late": 1, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 81.4, "CP2": 77.1}, "final_scores": {"Final_L": 69.6, "Final_R": 70.0, "Final_W": 66.9, "Final_S": 66.0}, "final_avg": 68.1, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 3, "late": 0, "excused": 0, "rate": 90.0, "codes": ["P", "P", "A", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 82.9, "Final_R": 64.9, "Final_W": 68.8, "Final_S": 78.6}, "final_avg": 73.8, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 2, "late": 2, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "A", "P", "P", "P", "P", "L", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 82.9, "Final_R": 64.9, "Final_W": 68.8, "Final_S": 78.6}, "final_avg": 73.8, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 1, "late": 0, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 82.9, "Final_R": 64.9, "Final_W": 68.8, "Final_S": 78.6}, "final_avg": 73.8, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 94.2, "overall_final_avg": 72.4, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO003", "name": "Lê Quang Minh", "email": "demo003@student.demo.vn", "cohort": "IEI_2627", "major": "Quản trị kinh doanh", "placement_cefr": "A1+", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 0, "late": 2, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 84.5, "CP2": 70.5}, "final_scores": {"Final_L": 88.2, "Final_R": 78.0, "Final_W": 82.3, "Final_S": 78.8}, "final_avg": 81.8, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 0, "late": 3, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 81.8, "Final_R": 74.5, "Final_W": 78.6, "Final_S": 87.4}, "final_avg": 80.6, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 30, "absent": 0, "late": 0, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 81.8, "Final_R": 74.5, "Final_W": 78.6, "Final_S": 87.4}, "final_avg": 80.6, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 0, "late": 2, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 81.8, "Final_R": 74.5, "Final_W": 78.6, "Final_S": 87.4}, "final_avg": 80.6, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [{"record_id": "CERT001", "type": "Certificate", "date": "01/06/2027", "course": "CERT", "issue": "IELTS", "skill": "All", "action": "Result verified", "owner": "Academic Support", "status": "Closed", "next_check": null, "planned_sessions": null, "actual_sessions": null, "listening": 5.5, "reading": 6.0, "writing": 5.5, "speaking": 5.5, "overall": 5.5, "evidence_status": "Verified", "b2_status": "Achieved", "note": "Demo outcome"}], "summary": {"overall_attendance_rate": 100.0, "overall_final_avg": 80.9, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": "Achieved"}}, {"id": "DEMO004", "name": "Phạm Khánh Linh", "email": "demo004@student.demo.vn", "cohort": "IEI_2627", "major": "Kinh doanh quốc tế", "placement_cefr": "A2-", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 77.0, "CP2": 74.2}, "final_scores": {"Final_L": 73.5, "Final_R": 66.0, "Final_W": 66.1, "Final_S": 79.5}, "final_avg": 71.3, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 2, "late": 2, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "A", "L", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 65.2, "Final_R": 80.6, "Final_W": 72.1, "Final_S": 73.3}, "final_avg": 72.8, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 2, "late": 0, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 65.2, "Final_R": 80.6, "Final_W": 72.1, "Final_S": 73.3}, "final_avg": 72.8, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 3, "late": 1, "excused": 0, "rate": 90.0, "codes": ["P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "A", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 65.2, "Final_R": 80.6, "Final_W": 72.1, "Final_S": 73.3}, "final_avg": 72.8, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 94.2, "overall_final_avg": 72.4, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO005", "name": "Vũ Hoàng Phúc", "email": "demo005@student.demo.vn", "cohort": "IEI_2627", "major": "Kỹ thuật phần mềm", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 21, "absent": 6, "late": 3, "excused": 0, "rate": 80.0, "codes": ["A", "P", "P", "P", "P", "P", "A", "P", "P", "P", "L", "P", "P", "P", "P", "P", "A", "P", "P", "P", "A", "P", "L", "P", "P", "P", "L", "A", "A", "P"]}, "checkpoint_scores": {"CP1": 74.8, "CP2": 70.0}, "final_scores": {"Final_L": 64.3, "Final_R": 71.6, "Final_W": 61.7, "Final_S": 71.4}, "final_avg": 67.2, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 21, "absent": 7, "late": 2, "excused": 0, "rate": 76.7, "codes": ["P", "P", "P", "P", "L", "P", "A", "P", "P", "A", "P", "P", "A", "P", "P", "P", "A", "A", "P", "P", "P", "P", "A", "P", "P", "L", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 58.8, "Final_R": 68.0, "Final_W": 65.7, "Final_S": 67.4}, "final_avg": 65.0, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 23, "absent": 4, "late": 3, "excused": 0, "rate": 86.7, "codes": ["L", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "A", "A", "P", "P", "L", "P", "A", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 58.8, "Final_R": 68.0, "Final_W": 65.7, "Final_S": 67.4}, "final_avg": 65.0, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 4, "late": 1, "excused": 0, "rate": 86.7, "codes": ["P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "A", "P", "P", "P", "L", "P", "P", "A", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 58.8, "Final_R": 68.0, "Final_W": 65.7, "Final_S": 67.4}, "final_avg": 65.0, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [{"record_id": "INT003", "type": "Follow-up", "date": "05/01/2027", "course": "AV2", "issue": "LMS", "skill": "General", "action": "LMS reminder", "owner": "Academic Support", "status": "Completed", "next_check": "08/01/2027", "planned_sessions": 1.0, "actual_sessions": 1.0, "listening": null, "reading": null, "writing": null, "speaking": null, "overall": null, "evidence_status": null, "b2_status": null, "note": "LMS lag"}], "certificates": [], "summary": {"overall_attendance_rate": 82.5, "overall_final_avg": 65.5, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Medium", "risk_reasons": ["Điểm danh cần cải thiện (82.5%)", "Điểm trung bình cần theo dõi (65.5)"], "support_count": 1, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO006", "name": "Đỗ Yến Nhi", "email": "demo006@student.demo.vn", "cohort": "IEI_2627", "major": "Quản trị kinh doanh", "placement_cefr": "A1+", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 24, "absent": 3, "late": 3, "excused": 0, "rate": 90.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "L", "P", "L", "P", "L", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P"]}, "checkpoint_scores": {"CP1": 78.4, "CP2": 82.8}, "final_scores": {"Final_L": 63.4, "Final_R": 75.4, "Final_W": 74.1, "Final_S": 82.3}, "final_avg": 73.8, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 2, "late": 0, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 63.3, "Final_R": 67.2, "Final_W": 75.1, "Final_S": 63.6}, "final_avg": 67.3, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 3, "late": 0, "excused": 0, "rate": 90.0, "codes": ["P", "P", "P", "A", "P", "P", "P", "A", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 63.3, "Final_R": 67.2, "Final_W": 75.1, "Final_S": 63.6}, "final_avg": 67.3, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 1, "late": 0, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 63.3, "Final_R": 67.2, "Final_W": 75.1, "Final_S": 63.6}, "final_avg": 67.3, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 92.5, "overall_final_avg": 68.9, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Medium", "risk_reasons": ["Điểm trung bình cần theo dõi (68.9)"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO007", "name": "Huỳnh Xuân Hòa", "email": "demo007@student.demo.vn", "cohort": "IEI_2627", "major": "Kinh doanh quốc tế", "placement_cefr": "A2-", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 69.5, "CP2": 69.0}, "final_scores": {"Final_L": 79.1, "Final_R": 63.0, "Final_W": 71.5, "Final_S": 76.7}, "final_avg": 72.6, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 2, "late": 0, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 77.9, "Final_R": 69.6, "Final_W": 81.6, "Final_S": 80.8}, "final_avg": 77.5, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 2, "late": 1, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 77.9, "Final_R": 69.6, "Final_W": 81.6, "Final_S": 80.8}, "final_avg": 77.5, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 2, "late": 2, "excused": 0, "rate": 93.3, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "A", "A", "P", "P", "P", "P", "P", "P", "L", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 77.9, "Final_R": 69.6, "Final_W": 81.6, "Final_S": 80.8}, "final_avg": 77.5, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 95.0, "overall_final_avg": 76.3, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO008", "name": "Tống Hồng Hà", "email": "demo008@student.demo.vn", "cohort": "IEI_2627", "major": "Kỹ thuật phần mềm", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 21, "absent": 8, "late": 1, "excused": 0, "rate": 73.3, "codes": ["P", "P", "P", "P", "A", "P", "P", "A", "P", "P", "P", "P", "P", "P", "A", "L", "P", "P", "P", "P", "A", "A", "P", "A", "P", "A", "P", "P", "P", "A"]}, "checkpoint_scores": {"CP1": 55.3, "CP2": 54.1}, "final_scores": {"Final_L": 50.3, "Final_R": 51.3, "Final_W": 53.4, "Final_S": 62.6}, "final_avg": 54.4, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 20, "absent": 9, "late": 1, "excused": 0, "rate": 70.0, "codes": ["P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "A", "P", "A", "A", "P", "A", "P", "P", "L", "A", "A", "P", "A", "P", "P", "P", "P", "P", "P", "A"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 51.3, "Final_R": 55.8, "Final_W": 55.3, "Final_S": 55.4}, "final_avg": 54.4, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 20, "absent": 9, "late": 1, "excused": 0, "rate": 70.0, "codes": ["P", "P", "P", "P", "P", "P", "A", "P", "L", "P", "P", "A", "P", "A", "A", "A", "P", "A", "A", "A", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 51.3, "Final_R": 55.8, "Final_W": 55.3, "Final_S": 55.4}, "final_avg": 54.4, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 18, "absent": 10, "late": 2, "excused": 0, "rate": 66.7, "codes": ["L", "P", "A", "P", "P", "A", "P", "P", "P", "A", "P", "P", "L", "P", "P", "A", "P", "P", "A", "P", "P", "A", "P", "A", "A", "P", "A", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 51.3, "Final_R": 55.8, "Final_W": 55.3, "Final_S": 55.4}, "final_avg": 54.4, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [{"record_id": "INT001", "type": "Intervention", "date": "02/10/2026", "course": "AV1", "issue": "Attendance", "skill": "General", "action": "Student contact", "owner": "IEI Academic Support", "status": "Completed", "next_check": "05/10/2026", "planned_sessions": 1.0, "actual_sessions": 1.0, "listening": null, "reading": null, "writing": null, "speaking": null, "overall": null, "evidence_status": null, "b2_status": null, "note": "2 buổi vắng liên tiếp"}], "certificates": [], "summary": {"overall_attendance_rate": 70.0, "overall_final_avg": 54.4, "current_stage": "AV4", "progress_pct": 83, "risk_level": "High", "risk_reasons": ["Điểm danh thấp (70.0%)", "Điểm trung bình thấp (54.4)"], "support_count": 1, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO009", "name": "Bùi Ngọc Vy", "email": "demo009@student.demo.vn", "cohort": "IEI_2627", "major": "Quản trị kinh doanh", "placement_cefr": "A1+", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 3, "late": 1, "excused": 0, "rate": 90.0, "codes": ["A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 75.1, "CP2": 70.4}, "final_scores": {"Final_L": 68.7, "Final_R": 64.2, "Final_W": 69.5, "Final_S": 73.3}, "final_avg": 68.9, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 23, "absent": 6, "late": 1, "excused": 0, "rate": 80.0, "codes": ["P", "A", "P", "P", "P", "P", "A", "P", "P", "P", "A", "P", "P", "L", "P", "A", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "A"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 66.3, "Final_R": 72.5, "Final_W": 62.7, "Final_S": 75.2}, "final_avg": 69.2, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 23, "absent": 7, "late": 0, "excused": 0, "rate": 76.7, "codes": ["P", "P", "A", "P", "P", "A", "P", "P", "A", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "A", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 66.3, "Final_R": 72.5, "Final_W": 62.7, "Final_S": 75.2}, "final_avg": 69.2, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 22, "absent": 4, "late": 4, "excused": 0, "rate": 86.7, "codes": ["L", "A", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "A", "P", "P", "L", "L", "P", "P", "P", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 66.3, "Final_R": 72.5, "Final_W": 62.7, "Final_S": 75.2}, "final_avg": 69.2, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 83.3, "overall_final_avg": 69.1, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Medium", "risk_reasons": ["Điểm danh cần cải thiện (83.3%)", "Điểm trung bình cần theo dõi (69.1)"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO010", "name": "Đặng Tuấn Tú", "email": "demo010@student.demo.vn", "cohort": "IEI_2627", "major": "Kinh doanh quốc tế", "placement_cefr": "A2-", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 3, "late": 2, "excused": 0, "rate": 90.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "A", "P", "P", "L", "L", "P", "P", "P", "P", "P", "P", "A"]}, "checkpoint_scores": {"CP1": 65.0, "CP2": 82.0}, "final_scores": {"Final_L": 67.8, "Final_R": 82.9, "Final_W": 72.1, "Final_S": 77.8}, "final_avg": 75.2, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 1, "late": 3, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "L", "L", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 67.1, "Final_R": 77.8, "Final_W": 74.0, "Final_S": 75.0}, "final_avg": 73.5, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 1, "late": 0, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 67.1, "Final_R": 77.8, "Final_W": 74.0, "Final_S": 75.0}, "final_avg": 73.5, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 23, "absent": 2, "late": 5, "excused": 0, "rate": 93.3, "codes": ["L", "P", "L", "P", "P", "P", "P", "P", "P", "P", "L", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "A", "P", "A", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 67.1, "Final_R": 77.8, "Final_W": 74.0, "Final_S": 75.0}, "final_avg": 73.5, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 94.2, "overall_final_avg": 73.9, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO011", "name": "Nguyễn Bảo Ngọc", "email": "demo011@student.demo.vn", "cohort": "IEI_2627", "major": "Kỹ thuật phần mềm", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 77.5, "CP2": 76.4}, "final_scores": {"Final_L": 86.4, "Final_R": 86.6, "Final_W": 76.9, "Final_S": 82.3}, "final_avg": 83.0, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 74.7, "Final_R": 72.5, "Final_W": 74.4, "Final_S": 86.7}, "final_avg": 77.1, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 30, "absent": 0, "late": 0, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 74.7, "Final_R": 72.5, "Final_W": 74.4, "Final_S": 86.7}, "final_avg": 77.1, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 74.7, "Final_R": 72.5, "Final_W": 74.4, "Final_S": 86.7}, "final_avg": 77.1, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [{"record_id": "CERT002", "type": "Certificate", "date": "02/06/2027", "course": "CERT", "issue": "IELTS", "skill": "All", "action": "Result verified", "owner": "Academic Support", "status": "Closed", "next_check": null, "planned_sessions": null, "actual_sessions": null, "listening": 5.5, "reading": 5.0, "writing": 4.5, "speaking": 5.5, "overall": 5.0, "evidence_status": "Verified", "b2_status": "One-skill short", "note": "Writing retake needed"}], "summary": {"overall_attendance_rate": 100.0, "overall_final_avg": 78.6, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": "One-skill short"}}, {"id": "DEMO012", "name": "Trần Phương Anh", "email": "demo012@student.demo.vn", "cohort": "IEI_2627", "major": "Quản trị kinh doanh", "placement_cefr": "A1+", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 2, "late": 2, "excused": 0, "rate": 93.3, "codes": ["P", "P", "L", "P", "P", "L", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 79.2, "CP2": 76.7}, "final_scores": {"Final_L": 68.5, "Final_R": 75.7, "Final_W": 72.5, "Final_S": 66.7}, "final_avg": 70.8, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 1, "late": 1, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "L", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 72.7, "Final_R": 65.6, "Final_W": 64.3, "Final_S": 65.0}, "final_avg": 66.9, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 1, "late": 1, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 72.7, "Final_R": 65.6, "Final_W": 64.3, "Final_S": 65.0}, "final_avg": 66.9, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 2, "late": 2, "excused": 0, "rate": 93.3, "codes": ["A", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 72.7, "Final_R": 65.6, "Final_W": 64.3, "Final_S": 65.0}, "final_avg": 66.9, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 95.0, "overall_final_avg": 67.9, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Medium", "risk_reasons": ["Điểm trung bình cần theo dõi (67.9)"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO013", "name": "Lê Đức Minh", "email": "demo013@student.demo.vn", "cohort": "IEI_2627", "major": "Kinh doanh quốc tế", "placement_cefr": "A2-", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 88.0, "CP2": 82.3}, "final_scores": {"Final_L": 75.8, "Final_R": 75.8, "Final_W": 75.1, "Final_S": 78.4}, "final_avg": 76.3, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 0, "late": 2, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 72.7, "Final_R": 71.9, "Final_W": 75.5, "Final_S": 80.4}, "final_avg": 75.1, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 72.7, "Final_R": 71.9, "Final_W": 75.5, "Final_S": 80.4}, "final_avg": 75.1, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 30, "absent": 0, "late": 0, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 72.7, "Final_R": 71.9, "Final_W": 75.5, "Final_S": 80.4}, "final_avg": 75.1, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 100.0, "overall_final_avg": 75.4, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO014", "name": "Phạm Gia Bảo", "email": "demo014@student.demo.vn", "cohort": "IEI_2627", "major": "Kỹ thuật phần mềm", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 29, "absent": 0, "late": 1, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 79.9, "CP2": 65.2}, "final_scores": {"Final_L": 66.2, "Final_R": 74.6, "Final_W": 77.2, "Final_S": 67.3}, "final_avg": 71.3, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 26, "absent": 3, "late": 1, "excused": 0, "rate": 90.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "L", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 64.6, "Final_R": 64.9, "Final_W": 69.0, "Final_S": 80.4}, "final_avg": 69.7, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 3, "late": 2, "excused": 0, "rate": 90.0, "codes": ["P", "A", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "L", "L", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 64.6, "Final_R": 64.9, "Final_W": 69.0, "Final_S": 80.4}, "final_avg": 69.7, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 22, "absent": 3, "late": 5, "excused": 0, "rate": 90.0, "codes": ["A", "L", "P", "L", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "A", "P", "L", "P", "P", "P", "P", "P", "P", "L", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 64.6, "Final_R": 64.9, "Final_W": 69.0, "Final_S": 80.4}, "final_avg": 69.7, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 92.5, "overall_final_avg": 70.1, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO015", "name": "Vũ Kim Ngân", "email": "demo015@student.demo.vn", "cohort": "IEI_2627", "major": "Quản trị kinh doanh", "placement_cefr": "A1+", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 19, "absent": 11, "late": 0, "excused": 0, "rate": 63.3, "codes": ["A", "P", "A", "P", "P", "A", "A", "A", "A", "P", "P", "P", "P", "A", "A", "A", "P", "P", "P", "P", "P", "P", "A", "P", "A", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {"CP1": 55.8, "CP2": 66.5}, "final_scores": {"Final_L": 51.4, "Final_R": 68.0, "Final_W": 67.0, "Final_S": 58.8}, "final_avg": 61.3, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 19, "absent": 10, "late": 1, "excused": 0, "rate": 66.7, "codes": ["P", "P", "P", "A", "P", "L", "A", "P", "P", "P", "P", "P", "A", "P", "P", "A", "P", "P", "P", "P", "A", "A", "A", "A", "P", "A", "P", "P", "P", "A"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 57.6, "Final_R": 65.9, "Final_W": 61.6, "Final_S": 59.7}, "final_avg": 61.2, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 18, "absent": 10, "late": 2, "excused": 0, "rate": 66.7, "codes": ["A", "P", "P", "A", "P", "P", "A", "P", "P", "A", "P", "A", "A", "L", "A", "P", "P", "A", "P", "P", "L", "P", "P", "P", "P", "P", "A", "A", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 57.6, "Final_R": 65.9, "Final_W": 61.6, "Final_S": 59.7}, "final_avg": 61.2, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 15, "absent": 14, "late": 1, "excused": 0, "rate": 53.3, "codes": ["P", "A", "P", "P", "A", "P", "P", "L", "P", "A", "A", "A", "P", "P", "A", "P", "P", "P", "A", "A", "A", "P", "A", "A", "A", "P", "P", "P", "A", "A"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 57.6, "Final_R": 65.9, "Final_W": 61.6, "Final_S": 59.7}, "final_avg": 61.2, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [{"record_id": "INT002", "type": "Intervention", "date": "20/10/2026", "course": "AV1", "issue": "Academic", "skill": "Writing", "action": "Targeted tutoring", "owner": "Tutor A", "status": "Completed", "next_check": "02/11/2026", "planned_sessions": 4.0, "actual_sessions": 3.0, "listening": null, "reading": null, "writing": null, "speaking": null, "overall": null, "evidence_status": null, "b2_status": null, "note": "Writing below trajectory"}], "certificates": [], "summary": {"overall_attendance_rate": 62.5, "overall_final_avg": 61.2, "current_stage": "AV4", "progress_pct": 83, "risk_level": "High", "risk_reasons": ["Điểm danh thấp (62.5%)", "Điểm trung bình cần theo dõi (61.2)"], "support_count": 1, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO016", "name": "Đỗ Thiên An", "email": "demo016@student.demo.vn", "cohort": "IEI_2627", "major": "Kinh doanh quốc tế", "placement_cefr": "A2-", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 4, "late": 1, "excused": 0, "rate": 86.7, "codes": ["P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "A", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "L"]}, "checkpoint_scores": {"CP1": 77.6, "CP2": 80.9}, "final_scores": {"Final_L": 70.2, "Final_R": 70.2, "Final_W": 67.8, "Final_S": 69.6}, "final_avg": 69.5, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 0, "late": 3, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 71.3, "Final_R": 82.2, "Final_W": 70.8, "Final_S": 72.2}, "final_avg": 74.1, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 1, "late": 2, "excused": 0, "rate": 96.7, "codes": ["P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "L", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 71.3, "Final_R": 82.2, "Final_W": 70.8, "Final_S": 72.2}, "final_avg": 74.1, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 1, "late": 4, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "L", "L", "P", "P", "P", "A", "P", "P", "P", "L", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 71.3, "Final_R": 82.2, "Final_W": 70.8, "Final_S": 72.2}, "final_avg": 74.1, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 95.0, "overall_final_avg": 72.9, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO017", "name": "Huỳnh Hải Đăng", "email": "demo017@student.demo.vn", "cohort": "IEI_2627", "major": "Kỹ thuật phần mềm", "placement_cefr": "A1", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 22, "absent": 6, "late": 2, "excused": 0, "rate": 80.0, "codes": ["P", "P", "P", "P", "P", "A", "P", "A", "L", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "L", "P", "P", "A", "P", "P", "P", "P", "A", "A", "P"]}, "checkpoint_scores": {"CP1": 75.9, "CP2": 56.0}, "final_scores": {"Final_L": 69.5, "Final_R": 65.5, "Final_W": 62.0, "Final_S": 62.8}, "final_avg": 65.0, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 24, "absent": 3, "late": 3, "excused": 0, "rate": 90.0, "codes": ["A", "P", "P", "L", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "L", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 59.5, "Final_R": 56.4, "Final_W": 73.7, "Final_S": 61.4}, "final_avg": 62.8, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 22, "absent": 7, "late": 1, "excused": 0, "rate": 76.7, "codes": ["A", "P", "P", "P", "P", "A", "P", "P", "P", "P", "P", "A", "P", "P", "L", "P", "P", "P", "P", "P", "P", "A", "A", "A", "P", "P", "P", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 59.5, "Final_R": 56.4, "Final_W": 73.7, "Final_S": 61.4}, "final_avg": 62.8, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 22, "absent": 6, "late": 2, "excused": 0, "rate": 80.0, "codes": ["P", "A", "P", "P", "P", "P", "P", "P", "P", "A", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "L", "A", "P", "L", "P", "A", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 59.5, "Final_R": 56.4, "Final_W": 73.7, "Final_S": 61.4}, "final_avg": 62.8, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 81.7, "overall_final_avg": 63.3, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Medium", "risk_reasons": ["Điểm danh cần cải thiện (81.7%)", "Điểm trung bình cần theo dõi (63.3)"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}, {"id": "DEMO018", "name": "Trần Thanh Mai", "email": "demo018@student.demo.vn", "cohort": "IEI_2627", "major": "Quản trị kinh doanh", "placement_cefr": "A1+", "target_b2_date": "07/06/2027", "courses": {"AV1": {"course_name": "English 1", "start": "21/09/2026", "end": "10/11/2026", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 3, "late": 2, "excused": 0, "rate": 90.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "A", "P", "P", "P", "P", "L", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "A", "L"]}, "checkpoint_scores": {"CP1": 67.5, "CP2": 80.7}, "final_scores": {"Final_L": 77.0, "Final_R": 65.3, "Final_W": 68.6, "Final_S": 81.4}, "final_avg": 73.1, "exit_review": null, "gv_note": null}, "AV2": {"course_name": "English 2", "start": "23/11/2026", "end": "15/01/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 27, "absent": 0, "late": 3, "excused": 0, "rate": 100.0, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P", "P", "P", "L", "P", "P", "L", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 70.5, "Final_R": 67.3, "Final_W": 76.4, "Final_S": 65.6}, "final_avg": 70.0, "exit_review": "Complete", "gv_note": null}, "AV3": {"course_name": "English 3", "start": "22/02/2027", "end": "27/03/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 28, "absent": 1, "late": 1, "excused": 0, "rate": 96.7, "codes": ["P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 70.5, "Final_R": 67.3, "Final_W": 76.4, "Final_S": 65.6}, "final_avg": 70.0, "exit_review": "Complete", "gv_note": null}, "AV4": {"course_name": "English 4", "start": "05/04/2027", "end": "22/05/2027", "class_id": "HER-01", "status": "Completed", "attendance": {"total": 30, "present": 25, "absent": 3, "late": 2, "excused": 0, "rate": 90.0, "codes": ["P", "L", "P", "P", "P", "P", "P", "P", "A", "A", "P", "P", "A", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "P", "L", "P", "P", "P"]}, "checkpoint_scores": {}, "final_scores": {"Final_L": 70.5, "Final_R": 67.3, "Final_W": 76.4, "Final_S": 65.6}, "final_avg": 70.0, "exit_review": "Complete", "gv_note": null}}, "lms": {"Cornerstone": [{"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 1", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 2", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 3", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 4", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}, {"period": "Week 5", "total": null, "completion": null, "export_date": "12/10/2026", "verified": "Yes"}], "AV1": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}], "AV2": [{"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}, {"period": "Course summary", "total": null, "completion": null, "export_date": "16/01/2027", "verified": "Yes"}]}, "support": [], "certificates": [], "summary": {"overall_attendance_rate": 94.2, "overall_final_avg": 70.8, "current_stage": "AV4", "progress_pct": 83, "risk_level": "Low", "risk_reasons": ["Tiến độ ổn định, không có cảnh báo"], "support_count": 0, "open_support_count": 0, "certificate_status": null}}]};
+</script>
+<script>
+/* ===================== helpers ===================== */
+const COURSE_LABEL = {Cornerstone:'Cornerstone', AV1:'AV1 · English 1', AV2:'AV2 · English 2', AV3:'AV3 · English 3', AV4:'AV4 · English 4', CERT:'Chứng chỉ B2'};
+const STAGE_ORDER = ['Cornerstone','AV1','AV2','AV3','AV4','CERT'];
+const RISK_VN = {Low:'Thấp', Medium:'Trung bình', High:'Cao'};
+const RISK_KEY = {Low:'low', Medium:'medium', High:'high'};
+const ATT_COLOR = {P:'#2E7D5B', A:'#B03A2E', L:'#B4740F', E:'#9AA2AF'};
+
+function parseVNDate(s){
+  if(!s) return null;
+  const [d,m,y] = s.split('/').map(Number);
+  return new Date(y, m-1, d);
+}
+function fmtPct(v){ return (v===null||v===undefined) ? '—' : v.toFixed(1)+'%'; }
+function fmtNum(v){ return (v===null||v===undefined) ? '—' : v.toFixed(1); }
+function initials(name){
+  const parts = name.trim().split(/\s+/);
+  return (parts[parts.length-1][0] + (parts.length>1?parts[0][0]:'')).toUpperCase();
+}
+function avg(arr){ const a = arr.filter(v=>v!==null&&v!==undefined); return a.length? a.reduce((x,y)=>x+y,0)/a.length : null; }
+function el(tag, cls, html){ const e=document.createElement(tag); if(cls) e.className=cls; if(html!==undefined) e.innerHTML=html; return e; }
+
+/* ===================== nav ===================== */
+document.querySelectorAll('.nav-item').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('view-'+btn.dataset.view).classList.add('active');
+  });
+});
+
+document.getElementById('sidebarFoot').innerHTML =
+  `Cohort <b>${DATA.cohort_name}</b><br>${DATA.students.length} sinh viên · dữ liệu demo<br>Cập nhật: ${DATA.generated_at}`;
+
+/* ===================== derived summary per student ===================== */
+const students = DATA.students.map(s=>({
+  ...s,
+  ...s.summary,
+}));
+
+/* ===================== KPI ===================== */
+function renderKPI(){
+  const n = students.length;
+  const avgAtt = avg(students.map(s=>s.overall_attendance_rate));
+  const avgFinal = avg(students.map(s=>s.overall_final_avg));
+  const riskCounts = {Low:0, Medium:0, High:0};
+  students.forEach(s=> riskCounts[s.risk_level]++ );
+  const watch = riskCounts.Medium + riskCounts.High;
+  const certRecords = students.flatMap(s=>s.certificates);
+  const achieved = certRecords.filter(c=>c.b2_status==='Achieved').length;
+
+  const items = [
+    {label:'Tổng số sinh viên', value:n, unit:'SV', color:'var(--blue)', note:DATA.cohort_name},
+    {label:'Điểm danh trung bình', value:avgAtt!==null?avgAtt.toFixed(1):'—', unit:'%', color:'var(--green)', note:'Trung bình AV1–AV4'},
+    {label:'Điểm tổng kết trung bình', value:avgFinal!==null?avgFinal.toFixed(1):'—', unit:'/100', color:'var(--gold)', note:'Trung bình Final L/R/W/S'},
+    {label:'Sinh viên cần theo dõi', value:watch, unit:`/ ${n}`, color:'var(--amber)', note:`${riskCounts.High} rủi ro cao · ${riskCounts.Medium} trung bình`},
+    {label:'Chứng chỉ đã ghi nhận', value:certRecords.length, unit:'hồ sơ', color:'var(--ink-3)', note: certRecords.length? `${achieved} đạt B2 · ${certRecords.length-achieved} cần bổ sung`: 'Chưa tới chặng thi chứng chỉ'},
+  ];
+  const row = document.getElementById('kpiRow');
+  row.innerHTML='';
+  items.forEach(it=>{
+    const d = el('div','kpi');
+    d.style.setProperty('--kpi-color', it.color);
+    d.innerHTML = `<div class="label">${it.label}</div><div class="value">${it.value}<small>${it.unit}</small></div><div class="note">${it.note}</div>`;
+    row.appendChild(d);
+  });
+  return {riskCounts};
+}
+
+/* ===================== risk donut ===================== */
+function renderDonut(riskCounts){
+  const total = riskCounts.Low+riskCounts.Medium+riskCounts.High;
+  const segs = [
+    {key:'Low', label:'Thấp', color:'#2E7D5B', value:riskCounts.Low},
+    {key:'Medium', label:'Trung bình', color:'#B4740F', value:riskCounts.Medium},
+    {key:'High', label:'Cao', color:'#B03A2E', value:riskCounts.High},
+  ];
+  const size=176, r=64, cx=size/2, cy=size/2, circumference=2*Math.PI*r;
+  let offset=0;
+  let circles='';
+  segs.forEach(s=>{
+    const frac = total? s.value/total : 0;
+    const len = frac*circumference;
+    circles += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${s.color}" stroke-width="20"
+      stroke-dasharray="${len} ${circumference-len}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})" stroke-linecap="butt"/>`;
+    offset += len;
+  });
+  const svg = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
+    <circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="#EDEFF2" stroke-width="20"/>
+    ${circles}
+    <text x="${cx}" y="${cy-3}" text-anchor="middle" font-family="IBM Plex Serif, serif" font-size="26" font-weight="600" fill="#1A2233">${total}</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-family="IBM Plex Sans, sans-serif" font-size="11" fill="#8A93A3">sinh viên</text>
+  </svg>`;
+
+  const wrap = el('div');
+  wrap.style.display='flex';
+  wrap.style.alignItems='center';
+  wrap.style.gap='18px';
+  const legend = el('div','legend');
+  legend.style.marginTop='0';
+  segs.forEach(s=>{
+    legend.appendChild(el('div','legend-item', `<span class="legend-dot" style="background:${s.color}"></span>${s.label}<span class="count">${s.value}</span>`));
+  });
+  wrap.appendChild(el('div', null, svg));
+  wrap.appendChild(legend);
+  const target = document.getElementById('riskDonut');
+  target.innerHTML='';
+  target.appendChild(wrap);
+}
+
+/* ===================== course bar chart ===================== */
+function renderCourseBar(){
+  const courses = ['AV1','AV2','AV3','AV4'];
+  const rows = courses.map(c=>{
+    const atts = students.map(s=> s.courses[c] ? s.courses[c].attendance.rate : null).filter(v=>v!==null);
+    const finals = students.map(s=> s.courses[c] ? s.courses[c].final_avg : null).filter(v=>v!==null);
+    return {course:c, att: avg(atts), fin: avg(finals)};
+  });
+  const maxV = 100;
+  const wrap = el('div');
+  wrap.style.display='flex';
+  wrap.style.flexDirection='column';
+  wrap.style.gap='14px';
+  rows.forEach(r=>{
+    const row = el('div');
+    const attW = r.att!==null ? (r.att/maxV*100).toFixed(1) : 0;
+    const finW = r.fin!==null ? (r.fin/maxV*100).toFixed(1) : 0;
+    row.innerHTML = `
+      <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:5px;">
+        <span style="font-weight:600;">${COURSE_LABEL[r.course]}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+        <span style="font-size:10.8px;color:var(--muted-2);width:74px;flex:0 0 74px;">Điểm danh</span>
+        <div style="flex:1;height:9px;background:var(--grey-soft);border-radius:5px;overflow:hidden;">
+          <div style="height:100%;width:${attW}%;background:var(--blue);border-radius:5px;"></div>
+        </div>
+        <span style="font-size:11.5px;color:var(--text);width:44px;text-align:right;">${r.att!==null?r.att.toFixed(1)+'%':'—'}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:10.8px;color:var(--muted-2);width:74px;flex:0 0 74px;">Điểm final</span>
+        <div style="flex:1;height:9px;background:var(--grey-soft);border-radius:5px;overflow:hidden;">
+          <div style="height:100%;width:${finW}%;background:var(--gold);border-radius:5px;"></div>
+        </div>
+        <span style="font-size:11.5px;color:var(--text);width:44px;text-align:right;">${r.fin!==null?r.fin.toFixed(1):'—'}</span>
+      </div>`;
+    wrap.appendChild(row);
+  });
+  const target = document.getElementById('courseBar');
+  target.innerHTML='';
+  target.appendChild(wrap);
+}
+
+/* ===================== watch list & recent support ===================== */
+function renderWatchList(){
+  const watch = students.filter(s=>s.risk_level!=='Low').sort((a,b)=>{
+    const order={High:0, Medium:1, Low:2};
+    return order[a.risk_level]-order[b.risk_level];
+  });
+  const target = document.getElementById('watchList');
+  target.innerHTML='';
+  if(!watch.length){ target.innerHTML = '<div class="no-data">Không có sinh viên nào ở mức rủi ro trung bình/cao.</div>'; return; }
+  watch.slice(0,8).forEach(s=>{
+    const row = el('div');
+    row.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);cursor:pointer;';
+    row.innerHTML = `
+      <div class="avatar" style="width:26px;height:26px;flex:0 0 26px;font-size:11px;">${initials(s.name)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12.8px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${s.name}</div>
+        <div style="font-size:11px;color:var(--muted-2);">${s.risk_reasons[0]}</div>
+      </div>
+      <span class="badge ${RISK_KEY[s.risk_level]}"><span class="dot"></span>${RISK_VN[s.risk_level]}</span>`;
+    row.addEventListener('click', ()=>openDrawer(s.id));
+    target.appendChild(row);
+  });
+}
+
+function renderRecentSupport(){
+  const all = students.flatMap(s=> s.support.map(r=>({...r, studentName:s.name, studentId:s.id})));
+  all.sort((a,b)=> new Date(b.date?.split('/').reverse().join('-')) - new Date(a.date?.split('/').reverse().join('-')));
+  const target = document.getElementById('recentSupport');
+  target.innerHTML='';
+  if(!all.length){ target.innerHTML='<div class="no-data">Chưa có ghi nhận hỗ trợ nào.</div>'; return; }
+  all.slice(0,6).forEach(r=>{
+    const open = !(r.status==='Completed'||r.status==='Closed');
+    const item = el('div', 'support-item '+(open?'open':'closed'));
+    item.style.cursor='pointer';
+    item.innerHTML = `<div class="s-top"><span>${r.studentName} · ${r.type}</span><span style="font-weight:400;color:var(--muted-2);">${r.date||''}</span></div>
+      <div class="s-meta">${r.course||''} · ${r.action||''} · ${r.owner||''}</div>
+      ${r.note?`<div class="s-note">${r.note}</div>`:''}`;
+    item.addEventListener('click', ()=>openDrawer(r.studentId));
+    target.appendChild(item);
+  });
+}
+
+/* ===================== certificates achieved ===================== */
+function renderCertAchieved(){
+  const records = students.flatMap(s=> s.certificates.map(c=>({...c, studentName:s.name, studentId:s.id})));
+  const achieved = records.filter(r=>r.b2_status==='Achieved');
+  const others = records.filter(r=>r.b2_status!=='Achieved');
+  document.getElementById('certAchievedHint').textContent = `${achieved.length}/${records.length || 0} hồ sơ đạt B2`;
+
+  const target = document.getElementById('certAchievedList');
+  target.innerHTML='';
+
+  if(!records.length){
+    target.innerHTML = '<div class="no-data">Chưa có sinh viên nào tới chặng thi chứng chỉ hoặc chưa có kết quả được ghi nhận.</div>';
+    return;
+  }
+
+  function row(r, achievedFlag){
+    const div = el('div');
+    div.style.cssText='display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border-soft);cursor:pointer;';
+    div.innerHTML = `
+      <div class="avatar" style="width:26px;height:26px;flex:0 0 26px;font-size:11px;${achievedFlag?'':'filter:grayscale(.4);opacity:.85;'}">${initials(r.studentName)}</div>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12.8px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.studentName}</div>
+        <div style="font-size:11px;color:var(--muted-2);">${r.issue||'Chứng chỉ'} · Overall ${r.overall??'—'} · ${r.date||''}</div>
+      </div>
+      <span class="badge ${achievedFlag?'low':'medium'}"><span class="dot"></span>${r.b2_status||'—'}</span>`;
+    div.addEventListener('click', ()=>openDrawer(r.studentId));
+    return div;
+  }
+
+  achieved.forEach(r=> target.appendChild(row(r, true)));
+  others.forEach(r=> target.appendChild(row(r, false)));
+}
+
+/* ===================== student table ===================== */
+let sortState = {key:'name', dir:1};
+function populateFilterOptions(){
+  const majors = [...new Set(students.map(s=>s.major))].sort();
+  const majorSel = document.getElementById('filterMajor');
+  majors.forEach(m=> majorSel.appendChild(el('option', null, m)).value = m);
+  const stageSel = document.getElementById('filterStage');
+  STAGE_ORDER.forEach(st=>{
+    if(students.some(s=>s.current_stage===st)){
+      const o = el('option', null, COURSE_LABEL[st]); o.value = st; stageSel.appendChild(o);
+    }
+  });
+}
+
+function getFilteredStudents(){
+  const q = document.getElementById('searchInput').value.trim().toLowerCase();
+  const risk = document.getElementById('filterRisk').value;
+  const major = document.getElementById('filterMajor').value;
+  const stage = document.getElementById('filterStage').value;
+  let list = students.filter(s=>{
+    if(q && !(s.name.toLowerCase().includes(q) || s.id.toLowerCase().includes(q))) return false;
+    if(risk && s.risk_level!==risk) return false;
+    if(major && s.major!==major) return false;
+    if(stage && s.current_stage!==stage) return false;
+    return true;
+  });
+  list.sort((a,b)=>{
+    let va=a[sortState.key], vb=b[sortState.key];
+    if(sortState.key==='risk_level'){ const ord={High:0,Medium:1,Low:2}; va=ord[a.risk_level]; vb=ord[b.risk_level]; }
+    if(typeof va==='string') return va.localeCompare(vb)*sortState.dir;
+    if(va===null||va===undefined) va=-Infinity;
+    if(vb===null||vb===undefined) vb=-Infinity;
+    return (va-vb)*sortState.dir;
+  });
+  return list;
+}
+
+function renderTable(){
+  const list = getFilteredStudents();
+  const tbody = document.getElementById('studentTbody');
+  tbody.innerHTML='';
+  list.forEach(s=>{
+    const tr = el('tr');
+    const attColor = s.overall_attendance_rate===null?'var(--grey)': s.overall_attendance_rate<80?'var(--red)': s.overall_attendance_rate<90?'var(--amber)':'var(--green)';
+    const finColor = s.overall_final_avg===null?'var(--grey)': s.overall_final_avg<60?'var(--red)': s.overall_final_avg<70?'var(--amber)':'var(--green)';
+    tr.innerHTML = `
+      <td><div class="name-cell"><div class="avatar">${initials(s.name)}</div><div><div>${s.name}</div><div class="id">${s.id}</div></div></div></td>
+      <td>${s.major}</td>
+      <td>${s.placement_cefr||'—'}</td>
+      <td>${COURSE_LABEL[s.current_stage]||s.current_stage}</td>
+      <td>
+        <span class="mini-bar-track"><span class="mini-bar-fill" style="width:${s.overall_attendance_rate||0}%;background:${attColor}"></span></span>${fmtPct(s.overall_attendance_rate)}
+      </td>
+      <td>
+        <span class="mini-bar-track"><span class="mini-bar-fill" style="width:${s.overall_final_avg||0}%;background:${finColor}"></span></span>${fmtNum(s.overall_final_avg)}
+      </td>
+      <td><span class="badge ${RISK_KEY[s.risk_level]}"><span class="dot"></span>${RISK_VN[s.risk_level]}</span></td>
+      <td>${s.support_count>0 ? s.support_count : '—'}</td>
+    `;
+    tr.addEventListener('click', ()=>openDrawer(s.id));
+    tbody.appendChild(tr);
+  });
+  document.getElementById('rowCount').textContent = `${list.length} / ${students.length} sinh viên`;
+}
+
+document.querySelectorAll('#studentTable thead th').forEach(th=>{
+  th.addEventListener('click', ()=>{
+    const key = th.dataset.key;
+    if(sortState.key===key){ sortState.dir*=-1; } else { sortState={key, dir:1}; }
+    document.querySelectorAll('#studentTable thead th').forEach(t=>t.classList.remove('sorted'));
+    th.classList.add('sorted');
+    renderTable();
+  });
+});
+['searchInput','filterRisk','filterMajor','filterStage'].forEach(id=>{
+  document.getElementById(id).addEventListener('input', renderTable);
+  document.getElementById(id).addEventListener('change', renderTable);
+});
+
+/* ===================== timeline (gantt) ===================== */
+function renderGantt(){
+  const sch = DATA.schedule;
+  const dates = sch.flatMap(s=>[parseVNDate(s.start), parseVNDate(s.end)]);
+  const minD = new Date(Math.min(...dates));
+  const maxD = new Date(Math.max(...dates));
+  const span = maxD-minD;
+  const today = new Date(2026,8,21); // 21/09/2026, current date context
+  const colors = ['#2E5C8C','#3B6FA3','#A9781F','#B4740F','#7A5814','#2E7D5B'];
+
+  const wrap = document.getElementById('ganttChart');
+  wrap.innerHTML='';
+  const gantt = el('div','gantt');
+  sch.forEach((s,i)=>{
+    const start = parseVNDate(s.start), end = parseVNDate(s.end);
+    const left = ((start-minD)/span*100).toFixed(2);
+    const width = Math.max(((end-start)/span*100),1.2).toFixed(2);
+    const row = el('div','gantt-row');
+    row.innerHTML = `
+      <div class="gantt-label"><div class="name">${s.course_name}</div><div class="sub">${s.start} – ${s.end}</div></div>
+      <div class="gantt-track">
+        <div class="gantt-bar" style="left:${left}%;width:${width}%;background:${colors[i%colors.length]};">${s.delivery}</div>
+        ${(today>=minD && today<=maxD) ? '' : ''}
+      </div>`;
+    gantt.appendChild(row);
+  });
+  wrap.appendChild(gantt);
+
+  // today marker overlay (positioned across full width using an absolutely placed track clone)
+  if(today>=minD && today<=maxD){
+    const todayLeft = ((today-minD)/span*100).toFixed(2);
+    const marker = el('div');
+    marker.style.cssText = `position:relative;height:0;`;
+    document.getElementById('todayHint').innerHTML = `Hôm nay: ${today.toLocaleDateString('vi-VN')}`;
+    // add vertical line spanning all rows
+    gantt.style.position='relative';
+    const line = el('div');
+    line.style.cssText = `position:absolute;top:0;bottom:0;left:calc(150px + 14px + ${todayLeft}% * (100% - 150px - 14px) / 100%);width:2px;background:var(--red);opacity:.75;pointer-events:none;`;
+    // simpler: compute via flex grid manually using JS after layout
+  }
+
+  // axis
+  const axis = document.getElementById('ganttAxisPlaceholder');
+}
+
+/* Simpler & robust today-line + month axis, computed after row rendering using actual pixel offsets */
+function renderGanttOverlay(){
+  const wrap = document.getElementById('ganttChart');
+  const track = wrap.querySelector('.gantt-track');
+  if(!track) return;
+  const sch = DATA.schedule;
+  const dates = sch.flatMap(s=>[parseVNDate(s.start), parseVNDate(s.end)]);
+  const minD = new Date(Math.min(...dates));
+  const maxD = new Date(Math.max(...dates));
+  const span = maxD-minD;
+  const today = new Date(2026,8,21);
+  if(today<minD || today>maxD) return;
+  const pct = (today-minD)/span*100;
+  wrap.querySelectorAll('.gantt-track').forEach(t=>{
+    const line = el('div','gantt-today');
+    line.style.left = pct+'%';
+    t.appendChild(line);
+  });
+  const firstTrack = wrap.querySelector('.gantt-row .gantt-track');
+  if(firstTrack){
+    const lbl = el('div','gantt-today-label');
+    lbl.style.left = pct+'%';
+    lbl.textContent = 'Hôm nay';
+    firstTrack.appendChild(lbl);
+  }
+}
+
+function renderMilestones(){
+  const target = document.getElementById('milestoneList');
+  target.innerHTML='';
+  DATA.schedule.forEach(s=>{
+    target.appendChild(el('div','milestone-item', `<span class="m-course">${s.course}</span><span class="m-text">${s.milestone}</span>`));
+  });
+}
+
+/* ===================== team/roles ===================== */
+const ROLES = [
+  {icon:'👩‍🏫', color:'var(--blue-soft)', title:'Giáo viên đứng lớp', text:'Cập nhật tab học phần đang dạy: điểm danh P/A/L/E theo từng buổi, điểm checkpoint/final và ghi chú ngắn khi cần.'},
+  {icon:'💻', color:'var(--green-soft)', title:'Moodle / E-learning', text:'Xuất dữ liệu định kỳ và chuyển cho AI ở tab LMS Export. Cornerstone được quản lý chủ yếu từ nguồn này, không yêu cầu giáo viên nhập điểm danh thủ công.'},
+  {icon:'🎓', color:'var(--gold-soft)', title:'Học vụ / Tutor', text:'Chỉ cập nhật tab hỗ trợ khi có cảnh báo, buổi phụ đạo, follow-up, lịch thi hoặc kết quả chứng chỉ của sinh viên.'},
+  {icon:'🤖', color:'var(--amber-soft)', title:'AI điều phối', text:'Ghép dữ liệu theo mã số sinh viên, tính điểm danh/tiến độ/rủi ro và tạo dashboard tổng hợp này.'},
+];
+function renderRoles(){
+  const target = document.getElementById('roleGrid');
+  target.innerHTML='';
+  ROLES.forEach(r=>{
+    const c = el('div','role-card');
+    c.innerHTML = `<div class="r-icon" style="background:${r.color};font-size:16px;">${r.icon}</div><h4>${r.title}</h4><p>${r.text}</p>`;
+    target.appendChild(c);
+  });
+}
+
+/* ===================== drawer (student detail) ===================== */
+const overlay = document.getElementById('overlay');
+const drawer = document.getElementById('drawer');
+overlay.addEventListener('click', closeDrawer);
+function closeDrawer(){ overlay.classList.remove('show'); drawer.classList.remove('show'); }
+
+function buildRelatedPeople(s){
+  const people = [];
+  const classIds = new Set();
+  Object.values(s.courses).forEach(c=>{ if(c.class_id) classIds.add(c.class_id); });
+  classIds.forEach(cid=>{
+    people.push({icon:'👩‍🏫', name:`Lớp ${cid}`, role:'Giáo viên phụ trách các học phần AV1–AV4'});
+  });
+  const owners = new Set(s.support.map(r=>r.owner).filter(Boolean));
+  owners.forEach(o=> people.push({icon:'🎓', name:o, role:'Học vụ / Tutor hỗ trợ sinh viên'}));
+  if(s.certificates.length) people.push({icon:'📜', name:s.certificates[0].owner || 'Academic Support', role:'Xác minh kết quả chứng chỉ'});
+  if(!people.length) people.push({icon:'ℹ️', name:'Chưa có ghi nhận', role:'Chưa phát sinh hỗ trợ/can thiệp riêng'});
+  return people;
+}
+
+function renderAttendanceStrip(codes){
+  return codes.map(c=>`<div class="att-cell" style="background:${ATT_COLOR[c]||'#E5E7EB'}" title="${c}"></div>`).join('');
+}
+
+function courseCardHTML(key, c){
+  if(!c) return '';
+  const att = c.attendance;
+  let scoreRows = '';
+  const cpKeys = Object.keys(c.checkpoint_scores||{});
+  const fnKeys = Object.keys(c.final_scores||{});
+  if(cpKeys.length || fnKeys.length){
+    scoreRows = `<table class="score-table"><thead><tr>${[...cpKeys,...fnKeys].map(k=>`<th>${k.replace(/_/g,' ')}</th>`).join('')}</tr></thead>
+      <tbody><tr>${[...cpKeys.map(k=>c.checkpoint_scores[k]), ...fnKeys.map(k=>c.final_scores[k])].map(v=>`<td>${v}</td>`).join('')}</tr></tbody></table>`;
+  }
+  return `
+  <div class="course-card">
+    <div class="course-card-head">
+      <div><div class="c-name">${COURSE_LABEL[key]}</div><div class="c-dates">${c.start} – ${c.end} · Lớp ${c.class_id||'—'}</div></div>
+      <span class="badge ${c.status==='Completed'?'low':'neutral'}"><span class="dot"></span>${c.status||'—'}</span>
+    </div>
+    <div class="course-card-body">
+      <div class="stat-row">
+        <div class="stat"><span class="n">${att.rate!==null?att.rate+'%':'—'}</span><span class="l">Tỷ lệ điểm danh</span></div>
+        <div class="stat"><span class="n">${att.present}</span><span class="l">Có mặt</span></div>
+        <div class="stat"><span class="n">${att.late}</span><span class="l">Trễ</span></div>
+        <div class="stat"><span class="n">${att.absent}</span><span class="l">Vắng</span></div>
+        ${c.final_avg!==null?`<div class="stat"><span class="n">${c.final_avg}</span><span class="l">TB Final</span></div>`:''}
+      </div>
+      <div class="attendance-strip">${renderAttendanceStrip(att.codes)}</div>
+      ${scoreRows}
+      ${c.exit_review?`<div style="margin-top:8px;font-size:11.8px;color:var(--muted);">Exit review: <b style="color:var(--text)">${c.exit_review}</b></div>`:''}
+      ${c.gv_note?`<div style="margin-top:6px;font-size:11.8px;color:var(--muted);">Ghi chú GV: ${c.gv_note}</div>`:'' }
+    </div>
+  </div>`;
+}
+
+function lmsCardHTML(s){
+  const entries = Object.entries(s.lms);
+  if(!entries.length) return '<div class="no-data">Chưa có dữ liệu Cornerstone / LMS export cho sinh viên này.</div>';
+  return entries.map(([course, recs])=>{
+    const totals = recs.map(r=>r.total).filter(v=>v!==null);
+    return `<div class="course-card" style="margin-bottom:10px;">
+      <div class="course-card-head"><div class="c-name">${course} · LMS</div><div class="c-dates">${recs.length} bản ghi</div></div>
+      <div class="course-card-body">
+        ${totals.length ? `<div class="stat"><span class="n">${avg(totals).toFixed(1)}</span><span class="l">Điểm TB LMS</span></div>` : '<div class="no-data">Chưa có điểm — dữ liệu LMS export sẽ được cập nhật định kỳ.</div>'}
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function openDrawer(id){
+  const s = students.find(x=>x.id===id);
+  if(!s) return;
+  const stageIdx = STAGE_ORDER.indexOf(s.current_stage);
+
+  const stageLabelsHTML = STAGE_ORDER.map((st,i)=>`<span class="${i===stageIdx?'current':''}">${st}</span>`).join('');
+
+  const relatedPeople = buildRelatedPeople(s);
+  const peopleHTML = relatedPeople.map(p=>`<div class="person-card"><div class="p-icon">${p.icon}</div><div><div class="p-name">${p.name}</div><div class="p-role">${p.role}</div></div></div>`).join('');
+
+  const coursesHTML = ['AV1','AV2','AV3','AV4'].map(k=>courseCardHTML(k, s.courses[k])).filter(Boolean).join('');
+
+  const supportHTML = s.support.length ? s.support.map(r=>{
+    const open = !(r.status==='Completed'||r.status==='Closed');
+    return `<div class="support-item ${open?'open':'closed'}">
+      <div class="s-top"><span>${r.type} · ${r.course||''}</span><span style="font-weight:400;color:var(--muted-2);">${r.date||''}</span></div>
+      <div class="s-meta">${r.issue||''}${r.skill?' · '+r.skill:''} · ${r.action||''} · phụ trách: ${r.owner||'—'} · trạng thái: ${r.status||'—'}</div>
+      ${r.note?`<div class="s-note">${r.note}</div>`:''}
+    </div>`;
+  }).join('') : '<div class="no-data">Chưa có ghi nhận hỗ trợ hoặc can thiệp.</div>';
+
+  const certHTML = s.certificates.length ? s.certificates.map(c=>`
+    <div class="cert-card">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div><b>${c.issue||'Chứng chỉ'}</b><div style="font-size:11.5px;color:var(--muted-2);">${c.date||''} · xác minh bởi ${c.owner||'—'}</div></div>
+        <span class="badge ${c.b2_status==='Achieved'?'low':'medium'}"><span class="dot"></span>${c.b2_status||'—'}</span>
+      </div>
+      <div class="cert-scores">
+        <div class="cs"><span class="n">${c.listening??'—'}</span>Listening</div>
+        <div class="cs"><span class="n">${c.reading??'—'}</span>Reading</div>
+        <div class="cs"><span class="n">${c.writing??'—'}</span>Writing</div>
+        <div class="cs"><span class="n">${c.speaking??'—'}</span>Speaking</div>
+        <div class="cs"><span class="n">${c.overall??'—'}</span>Overall</div>
+      </div>
+      ${c.note?`<div style="margin-top:8px;font-size:12px;color:var(--muted);">${c.note}</div>`:''}
+    </div>`).join('') : '<div class="no-data">Sinh viên chưa tới chặng thi chứng chỉ hoặc chưa có kết quả.</div>';
+
+  drawer.innerHTML = `
+    <div class="drawer-head">
+      <button class="drawer-close" id="drawerCloseBtn">✕</button>
+      <div class="d-name">${s.name}</div>
+      <div class="d-id">${s.id} · ${s.email}</div>
+      <div class="d-meta">
+        <span><b>${s.major}</b></span>
+        <span>Đầu vào: <b>${s.placement_cefr||'—'}</b></span>
+        <span>Mục tiêu B2: <b>${s.target_b2_date||'—'}</b></span>
+        <span class="badge ${RISK_KEY[s.risk_level]}" style="margin-left:0;"><span class="dot"></span>Rủi ro ${RISK_VN[s.risk_level]}</span>
+      </div>
+      <div class="progress-track"><div class="progress-fill" style="width:${s.progress_pct}%;"></div></div>
+      <div class="stage-labels">${stageLabelsHTML}</div>
+    </div>
+    <div class="drawer-body">
+      <div class="panel" style="padding:14px 16px;">
+        <div class="panel-head" style="margin-bottom:8px;"><h3 style="font-size:13.5px;">Vì sao ở mức rủi ro này?</h3></div>
+        <ul style="margin:0;padding-left:18px;font-size:12.6px;color:var(--muted);line-height:1.7;">
+          ${s.risk_reasons.map(r=>`<li>${r}</li>`).join('')}
+        </ul>
+      </div>
+
+      <div>
+        <div class="panel-head" style="margin-bottom:8px;"><h3>Người liên quan</h3></div>
+        <div class="people-grid">${peopleHTML}</div>
+      </div>
+
+      <div>
+        <div class="panel-head" style="margin-bottom:8px;"><h3>Cornerstone &amp; LMS</h3></div>
+        ${lmsCardHTML(s)}
+      </div>
+
+      <div>
+        <div class="panel-head" style="margin-bottom:8px;"><h3>Chi tiết học phần AV1–AV4</h3></div>
+        <div style="display:flex;flex-direction:column;gap:10px;">${coursesHTML}</div>
+      </div>
+
+      <div>
+        <div class="panel-head" style="margin-bottom:8px;"><h3>Lịch sử hỗ trợ &amp; can thiệp</h3></div>
+        ${supportHTML}
+      </div>
+
+      <div>
+        <div class="panel-head" style="margin-bottom:8px;"><h3>Kết quả chứng chỉ</h3></div>
+        ${certHTML}
+      </div>
+    </div>
+  `;
+  document.getElementById('drawerCloseBtn').addEventListener('click', closeDrawer);
+  overlay.classList.add('show');
+  drawer.classList.add('show');
+  drawer.scrollTop = 0;
+}
+
+/* ===================== init ===================== */
+function init(){
+  const {riskCounts} = renderKPI();
+  renderDonut(riskCounts);
+  renderCourseBar();
+  renderWatchList();
+  renderRecentSupport();
+  renderCertAchieved();
+  populateFilterOptions();
+  renderTable();
+  renderGantt();
+  requestAnimationFrame(renderGanttOverlay);
+  renderMilestones();
+  renderRoles();
+}
+init();
+</script>
+
+</script>
+</body>
+</html>
