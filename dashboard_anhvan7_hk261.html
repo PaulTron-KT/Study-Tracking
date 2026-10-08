@@ -5,6 +5,8 @@
 <title>Dashboard Điểm Quá Trình - Anh Văn 7 (HK261)</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<!--UPL_LIB-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <style>
   :root{
     --bg:#0f1420; --panel:#161d2e; --panel2:#1c2438; --border:#2a3350;
@@ -57,6 +59,21 @@
   .sw{width:10px;height:10px;border-radius:3px;display:inline-block;}
   .searchbox{flex:1;min-width:170px;}
   .tag{display:inline-block;background:var(--panel2);border:1px solid var(--border);padding:2px 8px;border-radius:10px;font-size:11px;color:var(--muted);}
+/*UPL_CSS_START*/
+  .upl-zone{border:2px dashed var(--border);border-radius:12px;padding:16px;background:var(--panel2);transition:.15s;}
+  .upl-zone.drag{border-color:var(--accent);background:#1d2a47;}
+  .upl-text{font-size:13px;color:var(--muted);margin-bottom:12px;line-height:1.55;}
+  .upl-btns{display:flex;gap:10px;flex-wrap:wrap;}
+  .upl-btn{background:var(--panel);color:var(--text);border:1px solid var(--border);border-radius:8px;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .upl-btn:hover{border-color:var(--accent);}
+  .upl-btn.primary{background:var(--accent);border-color:var(--accent);color:#fff;font-weight:600;}
+  .upl-status{margin-top:12px;font-size:13px;color:var(--muted);line-height:1.6;}
+  .upl-status.ok{color:var(--green);} .upl-status.err{color:var(--red);} .upl-status.warn{color:var(--yellow);} .upl-status.busy{color:var(--accent);}
+  .upl-warn{color:var(--yellow);margin-top:4px;}
+  .upl-status code{background:var(--panel2);padding:1px 5px;border-radius:4px;}
+  #uplBarWrap{display:none;height:6px;background:var(--panel2);border-radius:4px;margin-top:12px;overflow:hidden;}
+  #uplBar{height:100%;width:0;background:var(--accent);transition:width .2s;}
+/*UPL_CSS_END*/
 </style>
 </head>
 <body>
@@ -65,7 +82,7 @@
   <header>
     <div>
       <h1>📊 Dashboard Điểm Quá Trình — Anh Văn 7 (HK261)</h1>
-      <div class="subtitle">Học kỳ 261 · Mã học phần 71ENG710073 · 61 lớp · 28 giảng viên · 2052 sinh viên</div>
+      <div class="subtitle" id="subtitleStats">Học kỳ 261 · Mã học phần 71ENG710073 · 61 lớp · 28 giảng viên · 2052 sinh viên</div>
     </div>
     <div class="filters">
       <select id="teacherFilter"><option value="ALL">Tất cả giảng viên</option></select>
@@ -78,6 +95,24 @@
       <input type="text" id="searchBox" class="searchbox" placeholder="🔎 Tìm tên hoặc MSSV...">
     </div>
   </header>
+
+  <!--UPL_PANEL_START-->
+  <div class="card" id="uplCard" style="margin-bottom:14px;">
+    <h3><span class="dot" style="background:var(--green)"></span>Cập nhật dữ liệu từ file ZIP</h3>
+    <div class="upl-zone" id="uplZone">
+      <div class="upl-text"><b>Kéo thả file ZIP vào đây</b> (hoặc bấm nút bên dưới). Dashboard tự đọc các file lớp của <b>Anh Văn 7</b> (mã 71ENG710073) trong ZIP, bỏ qua môn khác, rồi tính lại toàn bộ số liệu. Nếu ZIP có kèm file <code>*_Grades.xlsx</code> của eLearning thì Study Tracking cũng được cập nhật. Dữ liệu được đọc ngay trên máy bạn, không gửi đi đâu.</div>
+      <div class="upl-btns">
+        <label class="upl-btn primary">📦 Chọn file ZIP<input id="uplZip" type="file" accept=".zip,.xlsx" multiple hidden></label>
+        <label class="upl-btn">📁 Chọn thư mục<input id="uplDir" type="file" webkitdirectory directory multiple hidden></label>
+        <label class="upl-btn">📊 Thêm file eLearning (Grades)<input id="uplGrades" type="file" accept=".xlsx" multiple hidden></label>
+        <button class="upl-btn" id="uplReset" type="button">↩ Dùng dữ liệu gốc</button>
+      </div>
+    </div>
+    <div id="uplBarWrap"><div id="uplBar"></div></div>
+    <div class="upl-status" id="uplStatus">Đang hiển thị dữ liệu gốc nhúng sẵn trong file này.</div>
+  </div>
+<!--UPL_PANEL_END-->
+
 
   <div class="kpis" id="kpiRow"></div>
 
@@ -608,5 +643,301 @@ searchBox.addEventListener('input', render);
 
 render();
 </script>
+<!--UPL_JS_START-->
+<script>
+(function(){
+'use strict';
+const COURSE_BASE = '71ENG710073';            // e.g. 71ENG110013
+const COURSE_NO   = '7';              // e.g. 1
+const GRADES_CODE = COURSE_BASE.replace(/^7/, '');   // eLearning export for AV4 is named "1ENG410043..."
+const nfc = s => String(s).normalize('NFC');
+const $ = id => document.getElementById(id);
+const sleep = () => new Promise(r => setTimeout(r, 0));
+
+/* ---------- snapshot of the data embedded in this file ---------- */
+const ORIGINAL = JSON.parse(JSON.stringify(data));
+const ORIG_ST = new Map();
+ORIGINAL.forEach(d => { if (d.Email && d.StudyTracking !== null && d.StudyTracking !== undefined) ORIG_ST.set(String(d.Email).trim().toLowerCase(), d.StudyTracking); });
+
+/* ---------- IndexedDB persistence (so the last upload survives reopening the file) ---------- */
+const DB_NAME = 'dash_hk261_' + COURSE_BASE;
+function idb(){ return new Promise((res, rej) => {
+  try { const rq = indexedDB.open(DB_NAME, 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore('kv');
+    rq.onsuccess = () => res(rq.result); rq.onerror = () => rej(rq.error);
+  } catch(e){ rej(e); } }); }
+async function idbGet(k){ try { const db = await idb(); return await new Promise((res, rej) => { const r = db.transaction('kv').objectStore('kv').get(k); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); }); } catch(e){ return undefined; } }
+async function idbSet(k, v){ try { const db = await idb(); await new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').put(v, k); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch(e){} }
+async function idbDel(k){ try { const db = await idb(); await new Promise((res, rej) => { const t = db.transaction('kv', 'readwrite'); t.objectStore('kv').delete(k); t.oncomplete = res; t.onerror = () => rej(t.error); }); } catch(e){} }
+
+/* ---------- small helpers ---------- */
+function num(v){ if (typeof v === 'number') return v; if (typeof v === 'string'){ const t = v.trim(); if (t === '' || isNaN(+t)) return NaN; return +t; } return NaN; }
+function blank(v){ return v === null || v === undefined || (typeof v === 'string' && v.trim() === ''); }
+function cleanMaSV(v){
+  if (blank(v)) return null;
+  let s = String(v).trim();
+  if (typeof v === 'number') return String(Math.round(v));
+  if (s.endsWith('.0')) s = s.slice(0, -2);
+  if (/^[\d.]+e\+?\d+$/i.test(s)) s = String(Math.round(Number(s)));
+  return s;
+}
+function looksLikeClassCode(s){ return typeof s === 'string' && (/71eng\d{6}/i.test(s) || /^\d+$/.test(s.trim())); }
+function titleCase(s){ return s.toLowerCase().replace(/(^|[^\p{L}\p{N}])(\p{L})/gu, (m, a, b) => a + b.toUpperCase()); }
+function fixTeacher(name){
+  let t = nfc(name).trim();
+  t = t.replace(/^(GVCH|GVTG)\s+/, '');
+  if (t === t.toUpperCase() && t !== t.toLowerCase()) t = titleCase(t);
+  return t;
+}
+function fmtDate(v){
+  if (v instanceof Date && !isNaN(v)) { const p = n => String(n).padStart(2, '0'); return p(v.getUTCDate()) + '/' + p(v.getUTCMonth() + 1) + '/' + v.getUTCFullYear(); }
+  return blank(v) ? null : String(v);
+}
+function rowsOf(ws){
+  const ref = ws['!ref']; if (!ref) return [];
+  const r = XLSX.utils.decode_range(ref); r.s.r = 0; r.s.c = 0;
+  return XLSX.utils.sheet_to_json(ws, { header: 1, range: r, raw: true, defval: null, blankrows: true });
+}
+function findSheet(names, re){ for (const s of names) if (re.test(nfc(s))) return s; return null; }
+
+/* ---------- reading uploaded sources (zip / loose files / folder) ---------- */
+async function collectEntries(files){
+  const out = [];
+  for (const f of files){
+    const lname = f.name.toLowerCase();
+    if (lname.endsWith('.zip')){
+      if (typeof JSZip === 'undefined') throw new Error('Thiếu thư viện JSZip (cần internet lần đầu để tải thư viện).');
+      const zip = await JSZip.loadAsync(f);
+      zip.forEach((path, ent) => { if (!ent.dir) out.push({ path: nfc(path), read: () => ent.async('uint8array') }); });
+    } else if (lname.endsWith('.xlsx')){
+      out.push({ path: nfc(f.webkitRelativePath || f.name), read: async () => new Uint8Array(await f.arrayBuffer()) });
+    }
+  }
+  return out;
+}
+
+/* ---------- parse one class workbook ---------- */
+function parseClassWorkbook(u8, code, teacherFolder){
+  const names = XLSX.read(u8, { type: 'array', bookSheets: true }).SheetNames;
+  const rs = findSheet(names, /^Tổng hợp/i), as = findSheet(names, /^Điểm danh/i);
+  if (!rs || !as) return { error: 'thiếu sheet "Tổng hợp" / "Điểm danh"' };
+  const wb = XLSX.read(u8, { type: 'array', sheets: [rs, as], cellDates: true });
+  const R = rowsOf(wb.Sheets[rs]), A = rowsOf(wb.Sheets[as]);
+  if (R.length < 3 || A.length < 3) return { error: 'sheet rỗng' };
+  const hdr = A[1] || [];
+  const attIdx = [];
+  hdr.forEach((v, i) => { if (typeof v === 'string' && v.toLowerCase().includes('attendance') && i > 10) attIdx.push(i); });
+  const attMap = new Map();
+  for (let i = 2; i < A.length; i++){
+    const a = A[i]; const id = cleanMaSV(a[1]); if (id === null || attMap.has(id)) continue;
+    attMap.set(id, {
+      so: num(a[5]), cp: num(a[6]), kp: num(a[7]), ban: blank(a[8]) ? null : a[8], xdb: num(a[9]),
+      att: attIdx.map(c => { const v = a[c]; if (v === 1) return 1; if (v === 'With permission' || v === 'Without permission') return 0; return null; })
+    });
+  }
+  const lop = '261_' + code;
+  const fallbackTeacher = teacherFolder ? fixTeacher(teacherFolder) : '';
+  const recs = [];
+  for (let i = 2; i < R.length; i++){
+    const r = R[i]; const id = cleanMaSV(r[3]); if (id === null) continue;
+    const a = attMap.get(id);
+    const gvRaw = r[1];
+    const gv = (typeof gvRaw === 'string' && gvRaw.trim() && !looksLikeClassCode(gvRaw)) ? fixTeacher(gvRaw) : fallbackTeacher;
+    const kt = num(r[9]), ol = num(r[10]), pa = num(r[11]);
+    const kt0 = isNaN(kt) ? 0 : kt, ol0 = isNaN(ol) ? 0 : ol, pa0 = isNaN(pa) ? 0 : pa;
+    const qt = kt0 + ol0 + pa0;
+    const kp = a && !isNaN(a.kp) ? a.kp : null;
+    const email = blank(r[8]) ? null : String(r[8]);
+    recs.push({
+      LopHoc: lop, GiangVien: gv || '(không rõ)', MaSV: id,
+      HoTen: ((blank(r[4]) ? '' : String(r[4])) + ' ' + (blank(r[5]) ? '' : String(r[5]))).trim(),
+      GioiTinh: blank(r[7]) ? null : String(r[7]), NgaySinh: fmtDate(r[6]), Khoa: null, Email: email,
+      DiemKiemTra: kt0, OnlineExercises: ol0, Participation: pa0, DiemQuaTrinh: qt,
+      SoBuoiDiHoc: a && !isNaN(a.so) ? a.so : null, VangCoPhep: a && !isNaN(a.cp) ? a.cp : null, VangKhongPhep: kp,
+      TinhTrangCamThi: a && a.ban !== null ? a.ban : 'KHÔNG', CoDiem: qt > 0,
+      StudyTracking: null, STMatched: false, ST_EL_Zero: false, ST_Absence_Zero: kp === 3 || kp === 4, STZero: false,
+      DiemXayDungBai: a && !isNaN(a.xdb) ? a.xdb : 0, Attendance: a ? a.att : null
+    });
+  }
+  return { recs };
+}
+
+/* ---------- eLearning "Grades" export ---------- */
+function parseGrades(u8){
+  const wb = XLSX.read(u8, { type: 'array' });
+  const ws = wb.Sheets['Grades'] || wb.Sheets[wb.SheetNames[0]];
+  const rows = XLSX.utils.sheet_to_json(ws, { header: 1, raw: true, defval: null });
+  const h = (rows[0] || []).map(x => String(x === null ? '' : x).toLowerCase());
+  const ei = h.findIndex(x => x.includes('email')), si = h.findIndex(x => x.includes('study tracking'));
+  if (ei < 0 || si < 0) throw new Error('không thấy cột Email / Study Tracking');
+  const m = new Map();
+  for (let i = 1; i < rows.length; i++){
+    const e = rows[i][ei]; if (blank(e)) continue;
+    const key = String(e).trim().toLowerCase(); if (m.has(key)) continue;
+    let v = rows[i][si];
+    if (typeof v === 'string' && v.trim() === '-') v = 0;
+    v = num(v);
+    m.set(key, v);
+  }
+  return m;
+}
+function applyST(recs, stMap){
+  recs.forEach(d => {
+    const v = d.Email ? stMap.get(String(d.Email).trim().toLowerCase()) : undefined;
+    const ok = v !== undefined && !isNaN(v);
+    d.StudyTracking = ok ? v : null; d.STMatched = ok;
+    d.ST_EL_Zero = ok && v === 0;
+    d.ST_Absence_Zero = d.VangKhongPhep === 3 || d.VangKhongPhep === 4;
+    d.STZero = d.ST_EL_Zero || d.ST_Absence_Zero;
+  });
+}
+
+/* ---------- main pipeline ---------- */
+const codeRe = new RegExp(COURSE_BASE + '_(\\d+)');
+function classify(path){
+  const base = path.split('/').pop();
+  if (path.includes('__MACOSX') || base.startsWith('~$') || base.startsWith('.') || !/\.xlsx$/i.test(base)) return null;
+  if (/grades/i.test(base)) return (base.includes(GRADES_CODE)) ? { kind: 'grades' } : null;
+  let m = base.match(codeRe);
+  if (m) return { kind: 'class', code: m[0] };
+  const other = path.match(/71ENG\d{6}/gi);
+  if (other && other.some(x => x.toUpperCase() !== COURSE_BASE)) return null;     // belongs to another course
+  if (/ENG\d{6}/i.test(base)) return null;
+  const seg = path.match(/AVTC\s*(\d)/i);
+  if (seg && seg[1] !== COURSE_NO) return null;                                  // sits in another course's folder
+  m = base.match(/_261_(\d+)/);
+  if (m) return { kind: 'class', code: COURSE_BASE + '_' + m[1] };
+  return null;
+}
+function teacherFromPath(path){
+  const dirs = path.split('/').slice(0, -1);
+  for (let i = dirs.length - 1; i >= 0; i--){
+    const d = dirs[i];
+    if (looksLikeClassCode(d) || codeRe.test(d) || /^_?261_/.test(d) || /^AVTC\s*\d+$/i.test(d)) continue;
+    return d;
+  }
+  return '';
+}
+
+function setStatus(html, cls){ const el = $('uplStatus'); el.className = 'upl-status ' + (cls || ''); el.innerHTML = html; }
+function setProgress(p){ $('uplBar').style.width = Math.round(p * 100) + '%'; $('uplBarWrap').style.display = p >= 1 || p <= 0 ? 'none' : 'block'; }
+function esc(s){ return String(s).replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])); }
+
+function applyToDashboard(recs, metaText){
+  data.length = 0; recs.forEach(r => data.push(r));
+  const sorted = [...new Set(data.map(d => d.GiangVien))].sort();
+  teacherFilter.innerHTML = '<option value="ALL">Tất cả giảng viên</option>' + sorted.map(t => '<option value="' + esc(t).replace(/"/g, '&quot;') + '">' + esc(t) + '</option>').join('');
+  teacherFilter.value = 'ALL';
+  populateClassFilter();
+  const nCls = new Set(data.map(d => d.LopHoc)).size, nGv = sorted.length;
+  const sub = $('subtitleStats');
+  if (sub) sub.textContent = 'Học kỳ 261 · Mã học phần ' + COURSE_BASE + ' · ' + nCls + ' lớp · ' + nGv + ' giảng viên · ' + data.length + ' sinh viên' + (metaText ? ' · ' + metaText : '');
+  document.querySelectorAll('.footer-note').forEach(el => {
+    el.innerHTML = el.innerHTML.replace(/từ \d+ file lớp/, 'từ ' + nCls + ' file lớp').replace(/do \d+ giảng viên/, 'do ' + nGv + ' giảng viên');
+  });
+  render();
+}
+
+async function handleFiles(fileList){
+  const files = Array.from(fileList || []);
+  if (!files.length) return;
+  const t0 = Date.now();
+  try {
+    if (typeof XLSX === 'undefined') throw new Error('Thiếu thư viện đọc Excel (cần internet lần đầu để tải thư viện).');
+    setStatus('Đang giải nén / đọc danh sách file...', 'busy'); setProgress(0.02); await sleep();
+    const entries = await collectEntries(files);
+    const classByCode = new Map(); const gradesEntries = [];
+    for (const e of entries){
+      const c = classify(e.path); if (!c) continue;
+      if (c.kind === 'grades') gradesEntries.push(e);
+      else { if (!classByCode.has(c.code)) classByCode.set(c.code, []); classByCode.get(c.code).push(e); }
+    }
+    // grades
+    let stMap = null, stSource = '';
+    for (const g of gradesEntries){
+      try { const m = parseGrades(await g.read()); stMap = stMap || new Map(); m.forEach((v, k) => { if (!stMap.has(k)) stMap.set(k, v); }); stSource = 'file Grades vừa tải lên'; }
+      catch(err){ setStatus('Không đọc được file Grades "' + esc(g.path) + '": ' + esc(err.message), 'err'); return; }
+    }
+    if (!classByCode.size && !stMap){
+      setStatus('Không tìm thấy file lớp học phần của <b>Anh Văn ' + COURSE_NO + '</b> (mã ' + COURSE_BASE + ') hoặc file Grades của môn này trong dữ liệu đã chọn.', 'err'); setProgress(0); return;
+    }
+    let recs = [], skipped = [], nOk = 0;
+    if (classByCode.size){
+      const codes = [...classByCode.keys()].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+      let i = 0;
+      for (const code of codes){
+        i++;
+        const cands = classByCode.get(code).sort((a, b) => {
+          const pa = /anh văn|updated/i.test(a.path.split('/').pop()) ? 0 : 1, pb = /anh văn|updated/i.test(b.path.split('/').pop()) ? 0 : 1;
+          return pa - pb || a.path.localeCompare(b.path);
+        });
+        setStatus('Đang xử lý lớp ' + code.replace(COURSE_BASE + '_', '') + ' (' + i + '/' + codes.length + ')...', 'busy'); setProgress(0.05 + 0.9 * i / codes.length); await sleep();
+        let done = false, lastErr = '';
+        for (const c of cands){
+          try {
+            const res = parseClassWorkbook(await c.read(), code, teacherFromPath(c.path));
+            if (res.error){ lastErr = res.error; continue; }
+            res.recs.forEach(r => recs.push(r)); done = true; nOk++; break;
+          } catch(err){ lastErr = err.message; }
+        }
+        if (!done) skipped.push(code.replace(COURSE_BASE + '_', 'lớp ') + ' (' + lastErr + ')');
+      }
+      if (!recs.length){ setStatus('Đọc được 0 sinh viên từ các file lớp. Kiểm tra lại cấu trúc file.', 'err'); setProgress(0); return; }
+    } else {
+      recs = JSON.parse(JSON.stringify(data));          // only Grades given: refresh Study Tracking on current data
+    }
+    // Study Tracking source priority: Grades in this upload > Grades saved earlier > snapshot embedded in this file
+    if (!stMap){
+      const saved = await idbGet('grades');
+      if (saved){ stMap = new Map(saved); stSource = 'file Grades đã tải lần trước'; }
+      else { stMap = ORIG_ST; stSource = 'dữ liệu Study Tracking cũ (chưa có file Grades mới)'; }
+    } else {
+      await idbSet('grades', [...stMap.entries()]);
+    }
+    applyST(recs, stMap);
+    const when = new Date().toLocaleString('vi-VN');
+    const meta = 'cập nhật ' + when;
+    applyToDashboard(recs, meta);
+    await idbSet('data', { recs, when, nOk, skipped, stSource });
+    setProgress(1); setProgress(0);
+    const secs = ((Date.now() - t0) / 1000).toFixed(1);
+    const unmatched = recs.filter(d => !d.STMatched).length;
+    let html = '✅ <b>Đã cập nhật</b> ' + (nOk ? nOk + ' lớp, ' : '') + recs.length + ' sinh viên (' + secs + 's). Study Tracking: ' + esc(stSource) + (unmatched ? ' — ' + unmatched + ' SV không khớp email' : '') + '.';
+    if (skipped.length) html += '<div class="upl-warn">⚠ Bỏ qua ' + skipped.length + ' lớp không đọc được: ' + skipped.map(esc).join('; ') + '</div>';
+    if (stSource.startsWith('dữ liệu Study Tracking cũ')) html += '<div class="upl-warn">Mẹo: đưa kèm file <code>' + GRADES_CODE + '-…_Grades.xlsx</code> vào ZIP (hoặc bấm "Thêm file eLearning") để cập nhật Study Tracking.</div>';
+    setStatus(html, skipped.length ? 'warn' : 'ok');
+  } catch(err){
+    console.error(err); setProgress(0);
+    setStatus('Lỗi: ' + esc(err.message || err), 'err');
+  }
+}
+
+/* ---------- wiring ---------- */
+function bind(){
+  const zipIn = $('uplZip'), dirIn = $('uplDir'), grIn = $('uplGrades'), zone = $('uplZone');
+  zipIn.addEventListener('change', () => { handleFiles(zipIn.files).finally(() => { zipIn.value = ''; }); });
+  dirIn.addEventListener('change', () => { handleFiles(dirIn.files).finally(() => { dirIn.value = ''; }); });
+  grIn.addEventListener('change', () => { handleFiles(grIn.files).finally(() => { grIn.value = ''; }); });
+  ['dragenter', 'dragover'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.add('drag'); }));
+  ['dragleave', 'drop'].forEach(ev => zone.addEventListener(ev, e => { e.preventDefault(); zone.classList.remove('drag'); }));
+  zone.addEventListener('drop', e => { const fl = e.dataTransfer && e.dataTransfer.files; if (fl && fl.length) handleFiles(fl); });
+  $('uplReset').addEventListener('click', async () => {
+    await idbDel('data'); await idbDel('grades');
+    applyToDashboard(JSON.parse(JSON.stringify(ORIGINAL)), '');
+    setStatus('Đã quay về dữ liệu gốc nhúng sẵn trong file này.', 'ok');
+  });
+  window.__handleFiles = handleFiles;
+}
+async function restore(){
+  const saved = await idbGet('data');
+  if (saved && saved.recs && saved.recs.length){
+    applyToDashboard(saved.recs, 'cập nhật ' + saved.when);
+    setStatus('Đang hiển thị dữ liệu đã tải lên lần trước (' + esc(saved.when) + '). Tải ZIP mới để cập nhật tiếp, hoặc bấm "Dùng dữ liệu gốc".', 'ok');
+  }
+}
+bind(); restore();
+})();
+</script>
+<!--UPL_JS_END-->
 </body>
 </html>
